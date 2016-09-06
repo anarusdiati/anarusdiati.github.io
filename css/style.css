@@ -1,0 +1,91 @@
+* {
+	margin: 0px;
+	padding: 0px;
+	font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;"
+}
+
+/*Bagian Header*/
+#header {
+	background-color: white;
+	height: 70px;
+}
+img.logo { 
+	height: 60px; 
+	margin: 5px 20px 5px 120px;
+}
+ul.nav{
+	float: right;
+	list-style: none;
+	margin: 10px;
+}
+ul.nav li {
+	float: left;
+	margin: 10px;
+}
+ul.nav li a {
+	color: black;
+	padding: 10px 30px;
+	text-decoration: none;
+}
+ul.nav li a:hover{
+	background-color: lightgrey;
+}
+
+/*Bagian Intro*/
+#intro {
+	height: 300px;
+	background-color: #2ecc71;
+	margin: 0px;
+	padding: 150px 90px;
+}
+.intro-pic{
+	background-color: black;
+	height:500px;
+	margin-bottom: 20px;
+}
+.text{
+	font-size: 30px;
+	color: white;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+}
+#intro h2 {
+	color: white;
+	font-size: 50px;
+}
+#intro p {
+	color: white;
+	font-size: 20px;
+	margin: 50px 0px;
+}
+#about {
+	background-color: white;
+	height: 300px;
+	margin: 0px;
+	padding: 50px 80px;
+	margin-bottom: 100px;
+	text-align: center;
+}
+.column {
+	width: 50%;
+	display: block;
+	float: left;
+}
+#blog {
+	background-color: #383838;
+	height: 150px;
+	margin: 0px;
+	padding: 50px 80px;
+	text-align: center;
+	color: white;
+}
+#footer {
+	background-color: black;
+	height: 10px;
+	margin: 0px;
+	padding: 15px 80px;
+	text-align: center;
+	color: white;
+}
