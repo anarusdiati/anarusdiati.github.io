@@ -73,9 +73,9 @@ ul.nav li a:hover{
 	display: block;
 	float: left;
 }
-#blog {
+#plan {
 	background-color: #383838;
-	height: 150px;
+	height: 250px;
 	margin: 0px;
 	padding: 50px 80px;
 	text-align: center;
