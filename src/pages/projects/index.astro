@@ -1,0 +1,111 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const projects = (await getCollection('projects')).sort((a, b) => {
+  const da = a.data.date?.getTime() ?? 0;
+  const db = b.data.date?.getTime() ?? 0;
+  return db - da;
+});
+
+// Collect all unique tags for the filter bar
+const allTags = Array.from(
+  new Set(projects.flatMap((p) => p.data.tags))
+).sort();
+---
+
+<BaseLayout title="Projects" description="Things I've built, filterable by category.">
+  <header class="mb-8">
+    <h1 class="text-3xl font-extrabold sm:text-4xl">Projects</h1>
+    <p class="mt-2 text-gray-600">A collection of things I've built. Filter by category.</p>
+  </header>
+
+  <!-- Filter bar -->
+  <div id="filter-bar" class="mb-8 flex flex-wrap gap-2">
+    <button
+      class="filter-btn rounded-full bg-primary-600 px-3.5 py-1.5 text-sm font-medium text-white"
+      data-tag="all"
+      aria-pressed="true"
+    >
+      All
+    </button>
+    {allTags.map((tag) => (
+      <button
+        class="filter-btn rounded-full bg-gray-100 px-3.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
+        data-tag={tag}
+        aria-pressed="false"
+      >
+        {tag}
+      </button>
+    ))}
+  </div>
+
+  <!-- Grid -->
+  <div id="project-grid" class="grid gap-5 sm:grid-cols-2">
+    {projects.map((p) => (
+      <div class="project-item" data-tags={p.data.tags.join(',')}>
+        <ProjectCard
+          title={p.data.title}
+          description={p.data.description}
+          tags={p.data.tags}
+          url={`${base}/projects/${p.slug}/`}
+        />
+      </div>
+    ))}
+  </div>
+
+  <p id="empty-state" class="hidden py-10 text-center text-gray-500">
+    No projects with this tag yet.
+  </p>
+</BaseLayout>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+  const items = document.querySelectorAll<HTMLElement>('.project-item');
+  const emptyState = document.getElementById('empty-state');
+
+  const activeClasses = ['bg-primary-600', 'text-white'];
+  const idleClasses = ['bg-gray-100', 'text-gray-700', 'hover:bg-gray-200'];
+
+  function setActive(btn: HTMLButtonElement) {
+    buttons.forEach((b) => {
+      b.classList.remove(...activeClasses);
+      b.classList.add(...idleClasses);
+      b.setAttribute('aria-pressed', 'false');
+    });
+    btn.classList.remove(...idleClasses);
+    btn.classList.add(...activeClasses);
+    btn.setAttribute('aria-pressed', 'true');
+  }
+
+  function filter(tag: string) {
+    let visible = 0;
+    items.forEach((item) => {
+      const tags = (item.dataset.tags || '').split(',');
+      const show = tag === 'all' || tags.includes(tag);
+      item.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    emptyState?.classList.toggle('hidden', visible !== 0);
+  }
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setActive(btn);
+      filter(btn.dataset.tag || 'all');
+    });
+  });
+
+  // Pre-select a tag when the page is opened with ?tag=... (e.g. from the About page).
+  const params = new URLSearchParams(window.location.search);
+  const requested = params.get('tag');
+  if (requested) {
+    const match = Array.from(buttons).find((b) => b.dataset.tag === requested);
+    if (match) {
+      setActive(match);
+      filter(requested);
+    }
+  }
+</script>

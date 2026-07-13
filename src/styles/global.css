@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-white text-gray-800 antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-bold text-gray-900 tracking-tight;
+  }
+  a {
+    @apply transition-colors;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-5xl px-4 sm:px-6;
+  }
+  /* Keep long-form reading text comfortable even on the wider frame */
+  .article {
+    max-width: 44rem;
+  }
+  .link-underline {
+    @apply text-primary-600 font-medium hover:text-primary-700 underline decoration-primary-200 underline-offset-4 hover:decoration-primary-400;
+  }
+  /* Simple, readable article styling (mini "prose") */
+  .article :where(h2) {
+    @apply mt-10 mb-3 text-2xl;
+  }
+  .article :where(h3) {
+    @apply mt-8 mb-2 text-xl;
+  }
+  .article :where(p) {
+    @apply my-4 leading-7 text-gray-700;
+  }
+  .article :where(ul) {
+    @apply my-4 list-disc pl-6 space-y-1 text-gray-700;
+  }
+  .article :where(ol) {
+    @apply my-4 list-decimal pl-6 space-y-1 text-gray-700;
+  }
+  .article :where(a) {
+    @apply text-primary-600 underline underline-offset-4 hover:text-primary-700;
+  }
+  .article :where(code) {
+    @apply rounded bg-gray-100 px-1.5 py-0.5 text-sm text-primary-700;
+  }
+  .article :where(pre) {
+    @apply my-5 overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100;
+  }
+  .article :where(pre code) {
+    @apply bg-transparent p-0 text-gray-100;
+  }
+  .article :where(blockquote) {
+    @apply my-5 border-l-4 border-primary-200 pl-4 italic text-gray-600;
+  }
+}
+
+/* ── Scroll reveal animation ──────────────────────────────────────────────
+   Elements with .reveal fade + slide up when they scroll into view.
+   The hidden starting state only applies once JS adds `.reveal-ready` to
+   <body>, so content is never hidden if JS is disabled. Motion is turned
+   off entirely for users who prefer reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal-ready .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  .reveal-ready .reveal.in-view {
+    opacity: 1;
+    transform: none;
+  }
+}

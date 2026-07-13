@@ -1,0 +1,78 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Tag from '../../components/Tag.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content, headings } = await project.render();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const formatted = project.data.date
+  ? project.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+  : null;
+---
+
+<BaseLayout title={project.data.title} description={project.data.description}>
+  <a href={`${base}/projects/`} class="text-sm text-primary-600 hover:text-primary-700">← Back to projects</a>
+
+  <header class="mt-4 mb-8 border-b border-gray-100 pb-6">
+    <h1 class="text-3xl font-extrabold leading-tight sm:text-4xl">{project.data.title}</h1>
+    <p class="mt-3 text-lg text-gray-600">{project.data.description}</p>
+    <div class="mt-4 flex flex-wrap items-center gap-3">
+      {formatted && <time class="text-sm text-gray-500">{formatted}</time>}
+      <div class="flex flex-wrap gap-1.5">
+        {project.data.tags.map((t) => <Tag label={t} />)}
+      </div>
+    </div>
+    {(project.data.link || project.data.github) && (
+      <div class="mt-5 flex flex-wrap gap-3">
+        {project.data.link && (
+          <a href={project.data.link} target="_blank" rel="noopener" class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">
+            View project ↗
+          </a>
+        )}
+        {project.data.github && (
+          <a href={project.data.github} target="_blank" rel="noopener" class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+            Source code ↗
+          </a>
+        )}
+      </div>
+    )}
+  </header>
+
+  <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_220px] lg:gap-14">
+    <article class="article reveal-children">
+      <Content />
+    </article>
+
+    {toc.length > 0 && (
+      <aside class="hidden lg:block">
+        <div class="sticky top-20">
+          <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Table of Contents</p>
+          <nav class="space-y-1 border-l border-gray-100 text-sm">
+            {toc.map((h) => (
+              <a
+                href={`#${h.slug}`}
+                class={`block border-l-2 border-transparent py-1 pl-3 text-gray-500 hover:border-primary-400 hover:text-primary-600 ${h.depth === 3 ? 'pl-6 text-xs' : ''}`}
+              >
+                {h.text}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </aside>
+    )}
+  </div>
+
+  <div class="mt-12 border-t border-gray-100 pt-6">
+    <a href={`${base}/projects/`} class="text-sm text-primary-600 hover:text-primary-700">← Back to projects</a>
+  </div>
+</BaseLayout>

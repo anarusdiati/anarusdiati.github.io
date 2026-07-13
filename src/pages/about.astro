@@ -1,0 +1,185 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const experience = [
+  {
+    period: '2026 – Present',
+    role: 'AI/ML Engineer',
+    org: 'Apple Developer Institute for AIML',
+    place: 'Surabaya',
+    text: 'Selected for an intensive, project-based program focused on artificial intelligence and machine learning. Here I deepen my skills in building and applying ML models and developing AI-powered applications through hands-on learning, mentorship, and collaboration.',
+  },
+  {
+    period: 'Jan 2026 – Present',
+    role: 'Founder & AI Researcher',
+    org: 'Cognivia AI',
+    place: 'Yogyakarta, Indonesia',
+    text: 'Initiated a concept-driven AI project exploring cognition, emotion, and human-centered intelligence — designing early frameworks for data representation, interpretability, and user-centered machine learning systems, while conducting exploratory research and prototyping in real-world scenarios.',
+  },
+  {
+    period: 'Jun – Aug 2025',
+    role: 'Participant, IT Bootcamp',
+    org: 'Mandiri Digital Academy',
+    place: 'Remote, Indonesia',
+    text: 'Intensive bootcamp on the intersection of banking, digital products, and data-driven decision making, emphasizing practical skills and industry-relevant workflows within financial services.',
+  },
+  {
+    period: 'Nov 2024 – Jan 2025',
+    role: 'AI Training Engineer',
+    org: 'Outlier AI',
+    place: 'Remote, Indonesia',
+    text: 'Evaluated and labeled AI responses to improve model performance, maintaining high data quality by assessing coherence, relevance, and factual accuracy to ensure reliable outputs.',
+  },
+  {
+    period: 'Jan – Dec 2023',
+    role: 'Research Assistant',
+    org: 'Dept. of Computer Science & Electronics, UGM',
+    place: 'Yogyakarta, Indonesia',
+    text: 'Gathered thousands of recent publications and built a recommender system based on the data using Flask.',
+  },
+  {
+    period: '2020 – 2021',
+    role: 'Research Assistant',
+    org: 'Center for Health Policy and Management, UGM',
+    place: 'Yogyakarta, Indonesia',
+    text: 'Supported maternal and child health research during COVID-19 by drafting policy reports and building dashboard visualizations. Contributed to mapping digital technology ecosystems for COVID-19 response in Yogyakarta and Jakarta, with findings published to advance crisis management and data-driven policy.',
+  },
+  {
+    period: '2019 – 2020',
+    role: 'Web Developer',
+    org: 'Center for Health Policy and Management, UGM',
+    place: 'Yogyakarta, Indonesia',
+    text: 'Revamped the DaSK (Dashboard Sistem Kesehatan) website with a new UI and custom icons on WordPress, and curated a database of health policy briefs from provinces across Indonesia.',
+  },
+];
+
+const education = [
+  {
+    period: '2021 – 2023',
+    school: 'Gadjah Mada University',
+    degree: 'Master of Computer Science',
+    details: [
+      'Highest GPA in Department of Computer Science and Electronics (Postgraduate Graduation Period III, 2023/2024)',
+      'Scholarship: Department of Computer Science and Electronics',
+      'Thesis: Extractive Automatic Text Summarization Using Sentence Similarity Measurement with Sentence-BERT',
+      'GPA: 3.93 / 4.00',
+    ],
+  },
+  {
+    period: '2015 – 2019',
+    school: 'Gadjah Mada University',
+    degree: 'Bachelor of Computer Science',
+    details: [
+      'Thesis: Automatic Text Summarization for Online News Articles in Bahasa Indonesia Using Modified TextTeaser',
+      'GPA: 3.45 / 4.00',
+    ],
+  },
+];
+
+// Skills with a `tag` link to the Projects page filtered by that tag.
+// The `tag` value must match the tags used in src/content/projects/*.md exactly.
+const skills = [
+  { name: 'Artificial Intelligence', tag: 'Artificial Intelligence' },
+  { name: 'Machine Learning', tag: 'Machine Learning' },
+  { name: 'Data Science', tag: 'Data Science' },
+  { name: 'Data Visualization', tag: 'Data Visualization' },
+  { name: 'Research', tag: 'Research' },
+  { name: 'Human-Centered AI Design' },
+  { name: 'Strategic Thinking' },
+  { name: 'Project Management' },
+  { name: 'Collaboration & Leadership' },
+];
+---
+
+<BaseLayout title="About" description="About Rokhana D. Rusdiati — AI/ML Engineer and Data Scientist.">
+  <header class="mb-8">
+    <h1 class="text-3xl font-extrabold sm:text-4xl">About</h1>
+  </header>
+
+  <div class="article">
+    <p>
+      Hi, I'm <strong>{SITE.fullName}</strong> — also known as ANANA. I'm an AI/ML Engineer and Data
+      Scientist with a foundation in Natural Language Processing and applied research. I
+      enjoy working at the intersection of data, technology, and human behavior — building
+      thoughtful, interpretable AI systems that support real-world decision-making.
+    </p>
+    <p>
+      I'm currently developing <strong>Cognivia</strong>, an independent AI initiative
+      focused on cognition, emotion, and human-centered intelligence.
+    </p>
+    <p>
+      <a href={SITE.resumeUrl} target="_blank" rel="noopener">Download my full resume (PDF) ↗</a>
+    </p>
+  </div>
+
+  <!-- Experience -->
+  <section class="mt-12">
+    <h2 class="text-2xl font-bold">Experience</h2>
+    <div class="mt-6 space-y-6 border-l border-gray-200 pl-6">
+      {experience.map((job) => (
+        <div class="relative">
+          <span class="absolute -left-[27px] top-1.5 h-3 w-3 rounded-full border-2 border-white bg-primary-500"></span>
+          <p class="text-xs font-medium uppercase tracking-wide text-primary-600">{job.period}</p>
+          <h3 class="mt-1 text-lg font-bold text-gray-900">{job.role}</h3>
+          <p class="text-sm font-medium text-gray-600">{job.org} · {job.place}</p>
+          <p class="mt-2 text-sm leading-6 text-gray-600">{job.text}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Education -->
+  <section class="mt-12">
+    <h2 class="text-2xl font-bold">Education</h2>
+    <div class="mt-6 grid gap-5">
+      {education.map((ed) => (
+        <div class="rounded-xl border border-gray-100 p-5 shadow-sm">
+          <p class="text-xs font-medium uppercase tracking-wide text-primary-600">{ed.period}</p>
+          <h3 class="mt-1 text-lg font-bold">{ed.degree}</h3>
+          <p class="text-sm font-medium text-gray-600">{ed.school}</p>
+          <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-600">
+            {ed.details.map((d) => <li>{d}</li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section class="mt-12">
+    <h2 class="text-2xl font-bold">Skills</h2>
+    <div class="mt-4 flex flex-wrap gap-2">
+      {skills.map((s) =>
+        s.tag ? (
+          <a
+            href={`${base}/projects/?tag=${encodeURIComponent(s.tag)}`}
+            class="rounded-full bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700 transition hover:bg-primary-600 hover:text-white"
+          >
+            {s.name}
+          </a>
+        ) : (
+          <span class="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">{s.name}</span>
+        )
+      )}
+    </div>
+    <p class="mt-3 text-xs text-gray-400">Tip: the blue skills link to related projects.</p>
+    <p class="mt-4 text-sm text-gray-600">
+      Languages: Indonesian (native / bilingual) · English (upper-intermediate)
+    </p>
+  </section>
+
+  <!-- Contact -->
+  <section class="mt-12">
+    <h2 class="text-2xl font-bold">Get in touch</h2>
+    <p class="mt-3 text-gray-600">
+      The best way to reach me is by
+      <a class="link-underline" href={`mailto:${SITE.email}`}>email</a>. You can also find me on
+      <a class="link-underline" href={SITE.socials.linkedin} target="_blank" rel="noopener">LinkedIn</a>,
+      <a class="link-underline" href={SITE.socials.medium} target="_blank" rel="noopener">Medium</a>, and
+      <a class="link-underline" href={SITE.socials.github} target="_blank" rel="noopener">GitHub</a>.
+    </p>
+  </section>
+</BaseLayout>

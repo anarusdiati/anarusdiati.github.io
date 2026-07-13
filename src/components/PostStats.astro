@@ -1,0 +1,77 @@
+---
+import { ANALYTICS } from '../consts';
+
+interface Props {
+  id: string; // unique id for this post (its slug)
+  title: string;
+  url: string; // absolute URL to the post
+}
+const { id, title, url } = Astro.props;
+
+const enc = encodeURIComponent;
+const shareX = `https://twitter.com/intent/tweet?text=${enc(title)}&url=${enc(url)}`;
+const shareLinkedIn = `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`;
+const shareWhatsApp = `https://api.whatsapp.com/send?text=${enc(`${title} ${url}`)}`;
+---
+
+<div class="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-gray-500">
+  {ANALYTICS.goatcounterCode && (
+    <span class="inline-flex items-center gap-1.5">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-7.5 9.75-7.5 9.75 7.5 9.75 7.5-3.75 7.5-9.75 7.5S2.25 12 2.25 12z" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+      <span class="post-views font-medium text-gray-700" data-gc={ANALYTICS.goatcounterCode}>–</span>
+      <span>views</span>
+    </span>
+  )}
+
+  {ANALYTICS.lyketApiKey && (
+    <button data-lyket-type="like" data-lyket-id={id} data-lyket-namespace="blog"></button>
+  )}
+
+  <span class="inline-flex flex-wrap items-center gap-2">
+    <span class="font-medium text-gray-600">Share</span>
+    <a href={shareX} target="_blank" rel="noopener" class="hover:text-primary-600" aria-label="Share on X">X</a>
+    <span class="text-gray-300">·</span>
+    <a href={shareLinkedIn} target="_blank" rel="noopener" class="hover:text-primary-600" aria-label="Share on LinkedIn">LinkedIn</a>
+    <span class="text-gray-300">·</span>
+    <a href={shareWhatsApp} target="_blank" rel="noopener" class="hover:text-primary-600" aria-label="Share on WhatsApp">WhatsApp</a>
+    <span class="text-gray-300">·</span>
+    <button type="button" class="copy-link hover:text-primary-600" data-url={url}>Copy link</button>
+  </span>
+</div>
+
+<script>
+  // Fetch the view count from GoatCounter for the current page.
+  // Note: GoatCounter ignores localhost, so counts only appear on the live site.
+  document.querySelectorAll<HTMLElement>('.post-views').forEach(async (el) => {
+    const code = el.getAttribute('data-gc');
+    if (!code) return;
+    try {
+      const res = await fetch(
+        `https://${code}.goatcounter.com/counter/${encodeURIComponent(location.pathname)}.json`
+      );
+      if (!res.ok) throw new Error('not ok');
+      const data = await res.json();
+      el.textContent = data.count ?? '0';
+    } catch {
+      el.textContent = '0';
+    }
+  });
+
+  // Copy-to-clipboard for the share link.
+  document.querySelectorAll<HTMLButtonElement>('.copy-link').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const link = btn.getAttribute('data-url') || location.href;
+      try {
+        await navigator.clipboard.writeText(link);
+        const prev = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => (btn.textContent = prev), 1500);
+      } catch {
+        /* clipboard blocked — ignore */
+      }
+    });
+  });
+</script>

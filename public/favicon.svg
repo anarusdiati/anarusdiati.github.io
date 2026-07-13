@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="49" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+  <g fill="#0a0a0a" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="26" text-anchor="middle">
+    <text x="12" y="59">A</text>
+    <text transform="translate(31,59) scale(-1,1)">N</text>
+    <text x="50" y="59">A</text>
+    <text transform="translate(69,59) scale(-1,1)">N</text>
+    <text x="88" y="59">A</text>
+  </g>
+</svg>

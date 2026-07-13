@@ -1,0 +1,87 @@
+---
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { SITE, ANALYTICS } from '../consts';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+const pageTitle = title ? `${title} — ${SITE.name}` : SITE.title;
+const pageDesc = description ?? SITE.description;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDesc} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDesc} />
+    <meta property="og:type" content="website" />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <Nav />
+    <main class="container-page flex-1 py-10 sm:py-14">
+      <slot />
+    </main>
+    <Footer />
+
+    {/* Scroll-reveal animation */}
+    <script>
+      (() => {
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce) return;
+
+        // Auto-tag children of any .reveal-children container, with a gentle stagger.
+        document.querySelectorAll<HTMLElement>('.reveal-children').forEach((parent) => {
+          Array.from(parent.children).forEach((child, i) => {
+            child.classList.add('reveal');
+            (child as HTMLElement).style.transitionDelay = `${Math.min(i * 70, 420)}ms`;
+          });
+        });
+
+        const els = document.querySelectorAll<HTMLElement>('.reveal');
+        if (!els.length) return;
+
+        document.body.classList.add('reveal-ready');
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('in-view');
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+        );
+        els.forEach((el) => io.observe(el));
+      })();
+    </script>
+
+    {/* View counter (GoatCounter) — only loads if configured */}
+    {ANALYTICS.goatcounterCode && (
+      <script
+        is:inline
+        data-goatcounter={`https://${ANALYTICS.goatcounterCode}.goatcounter.com/count`}
+        async
+        src="//gc.zgo.at/count.js"
+      ></script>
+    )}
+
+    {/* Like button widget (Lyket) — only loads if configured */}
+    {ANALYTICS.lyketApiKey && (
+      <script
+        is:inline
+        src={`https://unpkg.com/@lyket/widget@latest/dist/lyket.js?apiKey=${ANALYTICS.lyketApiKey}`}
+      ></script>
+    )}
+  </body>
+</html>

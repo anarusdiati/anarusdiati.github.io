@@ -1,0 +1,73 @@
+---
+import { NAV_LINKS, SITE } from '../consts';
+const { pathname } = Astro.url;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const isActive = (href: string) => {
+  const clean = pathname.replace(/\/$/, '') || '/';
+  if (href === '/') return clean === base + '' || clean === '/' || clean === base;
+  return clean.startsWith(base + href);
+};
+---
+
+<header class="sticky top-0 z-40 border-b border-gray-100 bg-white/80 backdrop-blur">
+  <nav class="container-page flex h-16 items-center justify-between">
+    <a href={base + '/'} class="text-lg font-extrabold text-gray-900 hover:text-primary-600">
+      {SITE.name}
+    </a>
+
+    <!-- Desktop links -->
+    <ul class="hidden items-center gap-6 sm:flex">
+      {NAV_LINKS.map((link) => (
+        <li>
+          <a
+            href={base + link.href}
+            class={`text-sm font-medium ${
+              isActive(link.href)
+                ? 'text-primary-600'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- Mobile toggle -->
+    <button
+      id="menu-toggle"
+      class="inline-flex items-center rounded-md p-2 text-gray-600 hover:bg-gray-100 sm:hidden"
+      aria-label="Toggle menu"
+      aria-expanded="false"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-6 w-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+      </svg>
+    </button>
+  </nav>
+
+  <!-- Mobile menu -->
+  <ul id="mobile-menu" class="hidden border-t border-gray-100 px-4 pb-4 sm:hidden">
+    {NAV_LINKS.map((link) => (
+      <li>
+        <a
+          href={base + link.href}
+          class={`block py-2 text-sm font-medium ${
+            isActive(link.href) ? 'text-primary-600' : 'text-gray-700 hover:text-gray-900'
+          }`}
+        >
+          {link.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</header>
+
+<script>
+  const toggle = document.getElementById('menu-toggle');
+  const menu = document.getElementById('mobile-menu');
+  toggle?.addEventListener('click', () => {
+    const open = menu?.classList.toggle('hidden');
+    toggle.setAttribute('aria-expanded', String(open === false));
+  });
+</script>

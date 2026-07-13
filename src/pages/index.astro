@@ -1,0 +1,93 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BlogCard from '../components/BlogCard.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { SITE } from '../consts';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 2);
+
+const featured = (await getCollection('projects'))
+  .filter((p) => p.data.featured)
+  .slice(0, 3);
+---
+
+<BaseLayout>
+  <!-- Hero -->
+  <section class="py-6 sm:py-10">
+    <p class="text-sm font-medium text-primary-600">Founder &amp; AI Researcher at Cognivia AI</p>
+    <h1 class="mt-3 text-4xl font-extrabold leading-tight sm:text-5xl">
+      Hi, I'm ANANA.
+    </h1>
+    <p class="mt-3 text-lg font-medium text-gray-500">
+      AI/ML Engineer · Data Scientist (NLP) · Master of Computer Science
+    </p>
+    <p class="mt-5 max-w-2xl text-lg leading-8 text-gray-600">
+      I'm an AI/ML Engineer and Data Scientist with a foundation in Natural Language
+      Processing and applied research. I enjoy working at the intersection of data,
+      technology, and human behavior — building thoughtful, interpretable AI systems
+      that support real-world decision-making.
+    </p>
+    <p class="mt-4 max-w-2xl text-lg leading-8 text-gray-600">
+      Currently I'm developing <span class="font-semibold text-gray-800">Cognivia</span>,
+      an independent AI initiative focused on cognition, emotion, and human-centered
+      intelligence.
+    </p>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <a href={`${base}/projects/`} class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">
+        View projects
+      </a>
+      <a href={`${base}/about/`} class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+        About me
+      </a>
+      <a href={SITE.resumeUrl} target="_blank" rel="noopener" class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+        Resume ↗
+      </a>
+    </div>
+  </section>
+
+  <!-- Featured projects -->
+  {featured.length > 0 && (
+    <section class="mt-14">
+      <div class="mb-5 flex items-baseline justify-between">
+        <h2 class="text-2xl font-bold">Featured projects</h2>
+        <a href={`${base}/projects/`} class="text-sm text-primary-600 hover:text-primary-700">See all →</a>
+      </div>
+      <div class="grid gap-5 sm:grid-cols-2">
+        {featured.map((p) => (
+          <ProjectCard
+            title={p.data.title}
+            description={p.data.description}
+            tags={p.data.tags}
+            url={`${base}/projects/${p.slug}/`}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Latest posts -->
+  {posts.length > 0 && (
+    <section class="mt-14">
+      <div class="mb-5 flex items-baseline justify-between">
+        <h2 class="text-2xl font-bold">Latest posts</h2>
+        <a href={`${base}/blog/`} class="text-sm text-primary-600 hover:text-primary-700">See all →</a>
+      </div>
+      <div class="grid gap-4">
+        {posts.map((post) => (
+          <BlogCard
+            title={post.data.title}
+            description={post.data.description}
+            date={post.data.date}
+            tags={post.data.tags}
+            url={`${base}/blog/${post.slug}/`}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+</BaseLayout>

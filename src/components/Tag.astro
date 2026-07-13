@@ -1,0 +1,16 @@
+---
+interface Props {
+  label: string;
+  active?: boolean;
+}
+const { label, active = false } = Astro.props;
+---
+<span
+  class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+    active
+      ? 'bg-primary-600 text-white'
+      : 'bg-primary-50 text-primary-700'
+  }`}
+>
+  {label}
+</span>
