@@ -36,15 +36,29 @@ const categories: { name: string; emoji: string; items: HobbyItem[] }[] = [
     ],
   },
   { name: 'Art', emoji: '🎨', items: [] },
-  { name: 'Coloring', emoji: '🖍️', items: [] },
   { name: 'Journaling', emoji: '📓', items: [] },
   { name: 'Paper Reading', emoji: '📄', items: [] },
 ];
+
+// Art gallery (placeholder images from Unsplash) — each piece lists the tools
+// used as tags. Swap `id` for your own photos later (put files in /public and
+// point src/full at them).
+type ArtPiece = { title: string; tools: string[]; id: string; alt: string };
+const U = (id: string, w: number, q: number) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=${q}`;
+const artPieces: ArtPiece[] = [
+  { title: 'Boats on the river', tools: ['Oil on canvas', 'Palette knife'], id: 'photo-1578926375605-eaf7559b1458', alt: 'Oil painting of people in a boat on a river' },
+  { title: 'Cabin in the woods', tools: ['Oil pastels', 'Textured board'], id: 'photo-1578301996581-bf7caec556c0', alt: 'Painting of a cabin and trees' },
+  { title: 'Flowers in bloom', tools: ['Watercolor', 'Cold-press paper'], id: 'photo-1579783900882-c0d3dad7b119', alt: 'Painting of pink and white flowers' },
+  { title: 'Sailing at dusk', tools: ['Acrylic', 'Canvas'], id: 'photo-1582561424760-0321d75e81fa', alt: 'Painting of a sail ship on the sea' },
+  { title: 'Sheep on the road', tools: ['Gouache', 'Sketchbook'], id: 'photo-1578301978693-85fa9c0320b9', alt: 'Painting of a herd of sheep on a road' },
+  { title: 'Quiet waters', tools: ['Oil on canvas', 'Fan brush'], id: 'photo-1688588426729-dc4f7bdb8fbe', alt: 'Painting of a body of water surrounded by trees' },
+];
 ---
 
-<BaseLayout title="Hobby" description="Things I enjoy away from the keyboard.">
+<BaseLayout title="Leisure" description="Things I enjoy away from the keyboard.">
   <header class="mb-8">
-    <h1 class="text-gradient inline-block text-3xl font-extrabold sm:text-4xl">Hobby</h1>
+    <h1 class="text-gradient inline-block text-3xl font-extrabold sm:text-4xl">Leisure</h1>
     <p class="mt-2 text-gray-600 dark:text-gray-400">The things I enjoy away from the keyboard. Pick a category.</p>
   </header>
 
@@ -69,16 +83,52 @@ const categories: { name: string; emoji: string; items: HobbyItem[] }[] = [
   </div>
 
   <!-- Sections (one per category). "All" shows every non-empty category. -->
-  {categories.map((cat) => (
+  {categories.map((cat) => {
+    const isArt = cat.name === 'Art';
+    const hasContent = cat.items.length > 0 || (isArt && artPieces.length > 0);
+    return (
     <section
-      class={`hobby-section mb-10 ${cat.items.length ? '' : 'hidden'}`}
+      class={`hobby-section mb-10 ${hasContent ? '' : 'hidden'}`}
       data-cat={cat.name}
-      data-empty={cat.items.length ? 'false' : 'true'}
+      data-empty={hasContent ? 'false' : 'true'}
     >
-      <h2 class="mb-4 text-lg font-bold text-gray-900 dark:text-gray-100">
+      <h2 class="hobby-heading mb-4 text-lg font-bold text-gray-900 dark:text-gray-100">
         <span class="mr-1">{cat.emoji}</span>{cat.name}
       </h2>
-      {cat.items.length > 0 ? (
+      {isArt ? (
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {artPieces.map((p) => (
+            <button
+              type="button"
+              class="art-item group block overflow-hidden rounded-xl border border-gray-100 text-left shadow-sm transition hover:border-primary-200 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-700"
+              data-full={U(p.id, 1600, 80)}
+              data-alt={p.alt}
+            >
+              <div class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                <img
+                  src={U(p.id, 800, 70)}
+                  alt={p.alt}
+                  loading="lazy"
+                  class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                />
+                <span class="pointer-events-none absolute right-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-xs font-medium text-white opacity-0 transition group-hover:opacity-100">
+                  Click to zoom
+                </span>
+              </div>
+              <div class="p-4">
+                <h3 class="text-base font-bold text-gray-900 dark:text-gray-100">{p.title}</h3>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                  {p.tools.map((tool) => (
+                    <span class="inline-flex items-center rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-500/15 dark:text-primary-300">
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : cat.items.length > 0 ? (
         <div class="grid gap-5 sm:grid-cols-2">
           {cat.items.map((item) => (
             <div class="rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-primary-200 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-700">
@@ -104,7 +154,28 @@ const categories: { name: string; emoji: string; items: HobbyItem[] }[] = [
         </div>
       )}
     </section>
-  ))}
+    );
+  })}
+
+  <!-- Lightbox for the Art gallery -->
+  <div
+    id="art-lightbox"
+    class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Artwork preview"
+  >
+    <button
+      id="art-lightbox-close"
+      class="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20"
+      aria-label="Close preview"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <img id="art-lightbox-img" src="" alt="" class="max-h-[90vh] max-w-[92vw] rounded-lg object-contain shadow-2xl" />
+  </div>
 </BaseLayout>
 
 <script>
@@ -138,6 +209,46 @@ const categories: { name: string; emoji: string; items: HobbyItem[] }[] = [
         const show = cat === 'all' ? !isEmpty : s.dataset.cat === cat;
         s.classList.toggle('hidden', !show);
       });
+      // Only show category headings in the "All" view; when a single filter is
+      // active the heading is redundant with the active chip, so hide it.
+      const showHeadings = cat === 'all';
+      document
+        .querySelectorAll<HTMLElement>('.hobby-heading')
+        .forEach((h) => h.classList.toggle('hidden', !showHeadings));
     });
+  });
+
+  // ── Art lightbox (click a piece to view it large) ──────────────────────────
+  const lb = document.getElementById('art-lightbox');
+  const lbImg = document.getElementById('art-lightbox-img') as HTMLImageElement | null;
+  const lbClose = document.getElementById('art-lightbox-close');
+
+  const openLightbox = (full: string, alt: string) => {
+    if (!lb || !lbImg) return;
+    lbImg.src = full;
+    lbImg.alt = alt;
+    lb.classList.remove('hidden');
+    lb.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  };
+  const closeLightbox = () => {
+    if (!lb || !lbImg) return;
+    lb.classList.add('hidden');
+    lb.classList.remove('flex');
+    lbImg.src = '';
+    document.body.style.overflow = '';
+  };
+
+  document.querySelectorAll<HTMLElement>('.art-item').forEach((btn) => {
+    btn.addEventListener('click', () =>
+      openLightbox(btn.dataset.full || '', btn.dataset.alt || '')
+    );
+  });
+  lbClose?.addEventListener('click', closeLightbox);
+  lb?.addEventListener('click', (e) => {
+    if (e.target === lb) closeLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
   });
 </script>

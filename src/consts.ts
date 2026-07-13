@@ -38,6 +38,6 @@ export const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/projects', label: 'Projects' },
   { href: '/blog', label: 'Blog' },
-  { href: '/hobby', label: 'Hobby' },
+  { href: '/leisure', label: 'Leisure' },
   { href: '/about', label: 'About' },
 ];
