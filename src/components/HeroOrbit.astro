@@ -1,0 +1,295 @@
+---
+/**
+ * HeroOrbit — objek interaktif "ruang angkasa" untuk hero home.
+ *
+ * Menaruh apa pun yang di-slot (mis. monogram ANANA) di pusat, lalu
+ * mengelilinginya dengan planet/satelit/roket yang mengorbit, asap glitter
+ * yang mengikuti kursor, komet berekor, bintang jatuh, dan kabut nebula.
+ *
+ * - Otomatis mengikuti dark/light mode (memantau class `dark` pada <html>).
+ * - Warna mengikuti palet periwinkle situs.
+ * - Menghormati prefers-reduced-motion (efek berhenti, tampil statis).
+ *
+ * Pakai:
+ *   <HeroOrbit class="w-56 sm:w-72 lg:w-80"><svg>…monogram…</svg></HeroOrbit>
+ */
+interface Props {
+  class?: string;
+}
+const { class: className = 'w-56 sm:w-72 lg:w-80' } = Astro.props;
+---
+
+<div class:list={['ao-root', className]}>
+  <div class="ao-stage">
+    <div class="ao-universe">
+      <canvas class="ao-fx"></canvas>
+      <div class="ao-tilt">
+        <div class="ao-system">
+          <div class="ao-orbit o3">
+            <div class="ao-obj ao-planet"></div>
+            <div class="ao-obj ao-rocket" style="left:auto;right:30px;top:auto;bottom:-10px">🚀</div>
+          </div>
+          <div class="ao-orbit o2">
+            <div class="ao-obj ao-planet"></div>
+            <div class="ao-obj ao-sat" style="left:auto;right:26px">🛰️</div>
+          </div>
+          <div class="ao-orbit o1">
+            <div class="ao-obj ao-planet"></div>
+          </div>
+        </div>
+        <div class="ao-core"><slot /></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .ao-root { position: relative; z-index: 0; }
+  /* padding-ratio: paksa kotak persegi walau semua isi absolute (anti-collapse) */
+  .ao-root::before { content: ''; display: block; padding-top: 100%; }
+  .ao-stage { position: absolute; top: 0; left: 0; width: 340px; height: 340px; transform-origin: top left; }
+  .ao-universe { position: absolute; inset: 0; perspective: 900px; overflow: hidden; border-radius: 24px; }
+  .ao-fx { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .ao-star { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #fff; animation: ao-tw 3s ease-in-out infinite; z-index: 1; }
+  :root:not(.dark) .ao-star { background: #96a1f6; }
+  @keyframes ao-tw { 0%,100% { opacity: .15; transform: scale(.6); } 50% { opacity: .9; transform: scale(1.2); } }
+
+  .ao-tilt { position: absolute; inset: 0; z-index: 3; transform-style: preserve-3d; transition: transform .25s ease-out; display: grid; place-items: center; }
+  .ao-system { position: absolute; width: 300px; height: 300px; transform-style: preserve-3d; transform: rotateX(70deg); }
+  .ao-orbit { position: absolute; inset: 0; transform-style: preserve-3d; animation: ao-spin linear infinite; }
+  .ao-orbit.o1 { inset: 82px; animation-duration: 6s; }
+  .ao-orbit.o2 { inset: 42px; animation-duration: 11s; animation-direction: reverse; }
+  .ao-orbit.o3 { inset: 0;   animation-duration: 17s; }
+  .ao-obj { position: absolute; top: -8px; left: 50%; margin-left: -8px; transform: rotateX(-70deg); }
+  .ao-planet { width: 14px; height: 14px; border-radius: 50%; }
+  .ao-planet { width: 16px; height: 16px; }
+  .ao-orbit.o1 .ao-planet { background: #96a1f6; box-shadow: 0 0 18px 4px rgba(150,161,246,.85); }
+  .ao-orbit.o2 .ao-planet { width: 12px; height: 12px; background: #aeb6f9; box-shadow: 0 0 16px 4px rgba(174,182,249,.85); }
+  .ao-orbit.o3 .ao-planet { width: 13px; height: 13px; background: #6470e2; box-shadow: 0 0 16px 4px rgba(100,112,226,.85); }
+  .ao-sat { font-size: 16px; filter: drop-shadow(0 0 6px rgba(255,255,255,.5)); }
+  .ao-rocket { font-size: 17px; filter: drop-shadow(0 0 8px #ffb35e); }
+
+  .ao-core { position: relative; z-index: 5; width: 118px; height: 118px; background: transparent; display: grid; place-items: center; animation: ao-bob 4s ease-in-out infinite; }
+  @keyframes ao-bob { 0%,100% { transform: translateY(-7px); } 50% { transform: translateY(7px); } }
+  @keyframes ao-spin { to { transform: rotateZ(360deg); } }
+
+  .ao-burst { position: absolute; width: 6px; height: 6px; border-radius: 50%; pointer-events: none; z-index: 9; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ao-orbit, .ao-core, .ao-star { animation: none; }
+    .ao-system { transform: rotateX(70deg); }
+  }
+</style>
+
+<script>
+  (() => {
+    const BASE = 340;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // status tema dibagikan ke semua instance
+    let dark = document.documentElement.classList.contains('dark');
+    new MutationObserver(() => {
+      dark = document.documentElement.classList.contains('dark');
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    const init = (root: HTMLElement) => {
+      const stage = root.querySelector('.ao-stage') as HTMLElement;
+      const uni = root.querySelector('.ao-universe') as HTMLElement;
+      const tilt = root.querySelector('.ao-tilt') as HTMLElement;
+      const core = root.querySelector('.ao-core') as HTMLElement;
+      const cv = root.querySelector('.ao-fx') as HTMLCanvasElement;
+      if (!uni || !cv) return;
+
+      // scaling responsif: sistem internal 340px di-scale ke lebar root
+      const fit = () => { stage.style.transform = `scale(${root.clientWidth / BASE})`; };
+      fit();
+      new ResizeObserver(fit).observe(root);
+
+      const ctx = cv.getContext('2d')!;
+      const W = BASE, H = BASE, dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+      ctx.scale(dpr, dpr);
+
+      // bintang
+      for (let i = 0; i < 26; i++) {
+        const s = document.createElement('div');
+        s.className = 'ao-star';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.top = Math.random() * 100 + '%';
+        s.style.animationDelay = Math.random() * 3 + 's';
+        uni.appendChild(s);
+      }
+
+      const rectOf = () => uni.getBoundingClientRect();
+      let mx = W / 2, my = H / 2, hasCursor = false;
+      let headX = W / 2, headY = H / 2, emitX = W / 2, emitY = H / 2, gCarry = 0;
+      let tx = 0, ty = 0, rx = 0, ry = 0, t = 0;
+
+      uni.addEventListener('pointermove', (e) => {
+        const r = rectOf();
+        mx = ((e.clientX - r.left) / r.width) * W;
+        my = ((e.clientY - r.top) / r.height) * H;
+        hasCursor = true;
+        const dx = mx / W - 0.5, dy = my / H - 0.5; tx = dx * 24; ty = -dy * 24;
+      });
+      uni.addEventListener('pointerleave', () => { hasCursor = false; tx = 0; ty = 0; });
+
+      type P = { x: number; y: number; vx: number; vy: number; life: number; max: number;
+        r0?: number; grow?: number; hue?: number; sz?: number; tw?: number };
+      let smoke: P[] = [], glit: P[] = [];
+      const neb = [
+        { x: 90, y: 110, r: 120, c: '150,161,246', ph: 0 },
+        { x: 250, y: 220, r: 110, c: '174,182,249', ph: 2 },
+        { x: 180, y: 80, r: 100, c: '100,112,226', ph: 4 },
+      ];
+      let comets: P[] = [], shoots: P[] = [], cometT = 2.4, shootT = 1.2;
+      const spawnComet = () => {
+        const edge = Math.random() < 0.5, y = 30 + Math.random() * 120;
+        comets.push({ x: edge ? -30 : W + 30, y, vx: (edge ? 1 : -1) * (90 + Math.random() * 60) / 60, vy: (20 + Math.random() * 30) / 60, life: 0, max: 99 });
+      };
+      const spawnShoot = () => shoots.push({ x: Math.random() * W, y: -10, vx: (-40 - Math.random() * 40) / 60, vy: (120 + Math.random() * 80) / 60, life: 0, max: 0.8 + Math.random() * 0.5 });
+
+      const STEP = 5, GSTEP = 18;
+      const spawnPuff = (x: number, y: number, dirx: number, diry: number) => {
+        const px = -diry, py = dirx, off = (Math.random() - 0.5) * 8;
+        const hue = 226 + Math.sin(t * 0.5) * 18 + Math.random() * 20;
+        smoke.push({
+          x: x + px * off, y: y + py * off,
+          vx: dirx * 0.3 + (Math.random() - 0.5) * 0.3, vy: diry * 0.3 + (Math.random() - 0.5) * 0.3 - 0.12,
+          r0: 8 + Math.random() * 5, grow: 14 + Math.random() * 14, life: 0, max: 0.85 + Math.random() * 0.8, hue,
+        });
+        if (smoke.length > 600) smoke.splice(0, smoke.length - 600);
+      };
+      const spawnGlit = (x: number, y: number) => glit.push({
+        x: x + (Math.random() - 0.5) * 22, y: y + (Math.random() - 0.5) * 22,
+        vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5 - 0.1,
+        life: 0, max: 0.6 + Math.random() * 0.8, sz: 0.8 + Math.random() * 1.8, tw: Math.random() * 6, hue: 224 + Math.random() * 34,
+      });
+
+      const draw = (dt: number) => {
+        ctx.clearRect(0, 0, W, H);
+        const smokeBlend = dark ? 'screen' : 'source-over';
+        const glitBlend = dark ? 'lighter' : 'source-over';
+        const nebA = dark ? 0.18 : 0.16;
+        const smokeL = dark ? 68 : 56, smokeA = dark ? 0.17 : 0.16;
+        const glitL = dark ? 90 : 52, glitSat = dark ? 100 : 90;
+
+        // cahaya pusat: titik fokus lembut yang selalu menyala (meski tengah kosong)
+        ctx.globalCompositeOperation = dark ? 'screen' : 'source-over';
+        const cgA = (dark ? 0.5 : 0.34) * (0.85 + 0.15 * Math.sin(t * 1.2));
+        const cg = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 100);
+        cg.addColorStop(0, `rgba(150,161,246,${cgA})`);
+        cg.addColorStop(0.55, `rgba(150,161,246,${cgA * 0.35})`);
+        cg.addColorStop(1, 'rgba(150,161,246,0)');
+        ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(W / 2, H / 2, 100, 0, 7); ctx.fill();
+
+        ctx.globalCompositeOperation = dark ? 'screen' : 'source-over';
+        neb.forEach((n) => {
+          const bx = n.x + Math.sin(t * 0.2 + n.ph) * 14, by = n.y + Math.cos(t * 0.17 + n.ph) * 14, rr = n.r * (0.9 + 0.1 * Math.sin(t * 0.5 + n.ph));
+          const g = ctx.createRadialGradient(bx, by, 0, bx, by, rr);
+          g.addColorStop(0, `rgba(${n.c},${nebA})`); g.addColorStop(1, `rgba(${n.c},0)`);
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bx, by, rr, 0, 7); ctx.fill();
+        });
+
+        let targetX = mx, targetY = my;
+        if (!hasCursor) { targetX = W / 2 + Math.cos(t * 0.7) * 70; targetY = H / 2 + Math.sin(t * 0.9) * 55; }
+        headX += (targetX - headX) * 0.2; headY += (targetY - headY) * 0.2;
+        let dx = headX - emitX, dy = headY - emitY, dist = Math.hypot(dx, dy);
+        if (dist > 0.001) {
+          const ux = dx / dist, uy = dy / dist;
+          while (dist >= STEP) {
+            emitX += ux * STEP; emitY += uy * STEP; dist -= STEP;
+            spawnPuff(emitX, emitY, ux, uy);
+            gCarry += STEP; if (gCarry >= GSTEP) { gCarry -= GSTEP; spawnGlit(emitX, emitY); }
+          }
+        }
+
+        ctx.globalCompositeOperation = smokeBlend as GlobalCompositeOperation;
+        smoke = smoke.filter((p) => p.life < p.max);
+        smoke.forEach((p) => {
+          p.life += dt; const f = p.life / p.max; p.x += p.vx; p.y += p.vy; p.vx *= 0.97; p.vy *= 0.97;
+          const r = p.r0! + f * p.grow!, a = Math.sin(f * Math.PI) * smokeA;
+          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+          g.addColorStop(0, `hsla(${p.hue},85%,${smokeL}%,${a})`);
+          g.addColorStop(0.5, `hsla(${p.hue},85%,${smokeL - 6}%,${a * 0.5})`);
+          g.addColorStop(1, `hsla(${p.hue},85%,${smokeL - 6}%,0)`);
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7); ctx.fill();
+        });
+
+        ctx.globalCompositeOperation = glitBlend as GlobalCompositeOperation;
+        glit = glit.filter((p) => p.life < p.max);
+        glit.forEach((p) => {
+          p.life += dt; const f = p.life / p.max; p.x += p.vx; p.y += p.vy;
+          const tw = 0.5 + 0.5 * Math.sin(t * 14 + p.tw!), a = Math.sin(f * Math.PI) * tw;
+          ctx.fillStyle = `hsla(${p.hue},${glitSat}%,${glitL}%,${a})`;
+          ctx.shadowBlur = 6; ctx.shadowColor = `hsla(${p.hue},${glitSat}%,${glitL - 5}%,${a})`;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.sz!, 0, 7); ctx.fill();
+        });
+        ctx.shadowBlur = 0;
+
+        ctx.globalCompositeOperation = dark ? 'lighter' : 'source-over';
+        cometT -= dt; if (cometT <= 0) { spawnComet(); cometT = 3.5 + Math.random() * 3; }
+        comets.forEach((c) => { c.x += c.vx * dt * 60; c.y += c.vy * dt * 60; });
+        comets = comets.filter((c) => c.x > -60 && c.x < W + 60 && c.y < H + 60);
+        const cometHead = dark ? 'rgba(200,206,251,0.95)' : 'rgba(80,91,196,0.9)';
+        const cometTail = dark ? 'rgba(174,182,249,0)' : 'rgba(80,91,196,0)';
+        comets.forEach((c) => {
+          const tlx = c.x - c.vx * 22, tly = c.y - c.vy * 22;
+          const g = ctx.createLinearGradient(tlx, tly, c.x, c.y);
+          g.addColorStop(0, cometTail); g.addColorStop(1, cometHead);
+          ctx.strokeStyle = g; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(tlx, tly); ctx.lineTo(c.x, c.y); ctx.stroke();
+          ctx.fillStyle = dark ? '#e1e4fd' : '#505bc4'; ctx.shadowBlur = dark ? 12 : 0; ctx.shadowColor = '#c8cefb';
+          ctx.beginPath(); ctx.arc(c.x, c.y, 2.6, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+        });
+
+        shootT -= dt; if (shootT <= 0) { spawnShoot(); shootT = 1.6 + Math.random() * 2.2; }
+        shoots.forEach((s) => { s.x += s.vx * dt * 60; s.y += s.vy * dt * 60; s.life += dt; });
+        shoots = shoots.filter((s) => s.life < s.max && s.y < H + 20);
+        shoots.forEach((s) => {
+          const a = 1 - s.life / s.max, tlx = s.x - s.vx * 10, tly = s.y - s.vy * 10;
+          const g = ctx.createLinearGradient(tlx, tly, s.x, s.y);
+          const col = dark ? '255,255,255' : '100,112,226';
+          g.addColorStop(0, `rgba(${col},0)`); g.addColorStop(1, `rgba(${col},${a})`);
+          ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(tlx, tly); ctx.lineTo(s.x, s.y); ctx.stroke();
+        });
+
+        ctx.globalCompositeOperation = 'source-over';
+      };
+
+      if (!reduce) {
+        let raf = 0, last = performance.now();
+        const loop = (now: number) => {
+          const dt = Math.min((now - last) / 1000, 0.05); last = now; t += dt;
+          rx += (ty - rx) * 0.08; ry += (tx - ry) * 0.08;
+          tilt.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+          draw(dt); raf = requestAnimationFrame(loop);
+        };
+        raf = requestAnimationFrame(loop);
+      }
+
+      // klik = ledakan
+      const COLORS = ['#96a1f6', '#aeb6f9', '#6470e2', '#c8cefb'];
+      uni.addEventListener('pointerdown', (e) => {
+        const r = rectOf();
+        const sx = r.width / W; // skala tampilan → posisi burst dalam px layar
+        const ox = e.clientX - r.left, oy = e.clientY - r.top;
+        if (core) { core.style.transform = 'scale(.9)'; setTimeout(() => { core.style.transform = ''; }, 160); }
+        for (let i = 0; i < 16; i++) {
+          const b = document.createElement('div'); b.className = 'ao-burst';
+          b.style.left = (ox / sx) + 'px'; b.style.top = (oy / sx) + 'px';
+          b.style.background = COLORS[i % COLORS.length]; b.style.boxShadow = '0 0 8px ' + b.style.background;
+          uni.appendChild(b);
+          const ang = (Math.PI * 2 * i) / 16 + Math.random() * 0.5, distB = 40 + Math.random() * 55;
+          b.animate(
+            [{ transform: 'translate(0,0) scale(1)', opacity: 1 },
+             { transform: `translate(${Math.cos(ang) * distB}px,${Math.sin(ang) * distB}px) scale(0)`, opacity: 0 }],
+            { duration: 650 + Math.random() * 250, easing: 'cubic-bezier(.2,.7,.2,1)' }
+          ).onfinish = () => b.remove();
+        }
+      });
+    };
+
+    document.querySelectorAll<HTMLElement>('.ao-root').forEach(init);
+  })();
+</script>

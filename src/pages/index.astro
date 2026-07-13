@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BlogCard from '../components/BlogCard.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import HeroOrbit from '../components/HeroOrbit.astro';
 import { SITE } from '../consts';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -19,49 +20,30 @@ const featured = (await getCollection('projects'))
 <BaseLayout>
   <!-- Hero -->
   <section class="grid items-center gap-10 py-6 sm:py-10 lg:grid-cols-[1fr_auto]">
-    <div>
-      <p class="text-sm font-medium text-primary-600 dark:text-primary-400">Founder &amp; AI Researcher at Cognivia AI</p>
-      <h1 class="mt-3 text-4xl font-extrabold leading-tight sm:text-5xl">
+    <div class="max-w-xl">
+      <p class="text-xs font-medium text-primary-600 dark:text-primary-400">Founder &amp; AI Researcher at Cognivia AI</p>
+      <h1 class="mt-2 text-3xl font-extrabold leading-tight sm:text-4xl">
         Hi, I'm <span class="text-gradient">Nana</span>.
       </h1>
-      <p class="mt-3 text-lg font-medium text-gray-500 dark:text-gray-400">
+      <p class="mt-2 text-sm font-medium text-gray-500 dark:text-gray-400">
         AI/ML Engineer · Data Scientist (NLP) · Master of Computer Science
       </p>
-      <p class="mt-5 max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-400">
+      <p class="mt-4 text-sm leading-6 text-gray-600 dark:text-gray-400">
         I'm an AI/ML Engineer and Data Scientist with a foundation in Natural Language
         Processing and applied research. I enjoy working at the intersection of data,
         technology, and human behavior — building thoughtful, interpretable AI systems
         that support real-world decision-making.
       </p>
-      <p class="mt-4 max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-400">
+      <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400">
         Currently I'm developing <span class="font-semibold text-gray-800 dark:text-gray-200">Cognivia</span>,
         an independent AI initiative focused on cognition, emotion, and human-centered
         intelligence.
       </p>
     </div>
 
-    <!-- ANANA monogram -->
+    <!-- Interactive space scene (center intentionally empty) -->
     <div class="justify-self-center lg:justify-self-end">
-      <div class="monogram-float w-44 sm:w-52 lg:w-64" style="filter: drop-shadow(0 18px 30px rgba(100,112,226,0.28));">
-        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="h-auto w-full" role="img" aria-label="ANANA monogram">
-          <defs>
-            <linearGradient id="pw" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#aeb6f9" />
-              <stop offset="0.55" stop-color="#96a1f6" />
-              <stop offset="1" stop-color="#6470e2" />
-            </linearGradient>
-          </defs>
-          <circle cx="120" cy="120" r="112" fill="url(#pw)" />
-          <circle cx="120" cy="120" r="104" fill="none" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1.5" />
-          <g fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="46" text-anchor="middle">
-            <text x="47" y="137">A</text>
-            <text transform="translate(83.5,137) scale(-1,1)">N</text>
-            <text x="120" y="137">A</text>
-            <text x="156.5" y="137">N</text>
-            <text x="193" y="137">A</text>
-          </g>
-        </svg>
-      </div>
+      <HeroOrbit class="w-72 sm:w-80 lg:w-[440px]" />
     </div>
   </section>
 
