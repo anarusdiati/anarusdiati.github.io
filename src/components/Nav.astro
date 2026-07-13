@@ -9,51 +9,79 @@ const isActive = (href: string) => {
 };
 ---
 
-<header class="sticky top-0 z-40 border-b border-gray-100 bg-white/80 backdrop-blur">
+<header class="sticky top-0 z-40 border-b border-gray-100 bg-white/80 backdrop-blur dark:border-gray-800 dark:bg-gray-950/80">
   <nav class="container-page flex h-16 items-center justify-between">
-    <a href={base + '/'} class="text-lg font-extrabold text-gray-900 hover:text-primary-600">
-      {SITE.name}
+    <a href={base + '/'} aria-label="ANANA — home" class="text-gray-900 hover:text-primary-600 dark:text-gray-100 dark:hover:text-primary-400">
+      <svg viewBox="0 0 96 24" class="h-5 w-auto" fill="currentColor" role="img" aria-label="ANANA">
+        <g font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="22" text-anchor="middle">
+          <text x="10" y="18">A</text>
+          <text transform="translate(29,18) scale(-1,1)">N</text>
+          <text x="48" y="18">A</text>
+          <text x="67" y="18">N</text>
+          <text x="86" y="18">A</text>
+        </g>
+      </svg>
     </a>
 
-    <!-- Desktop links -->
-    <ul class="hidden items-center gap-6 sm:flex">
-      {NAV_LINKS.map((link) => (
-        <li>
-          <a
-            href={base + link.href}
-            class={`text-sm font-medium ${
-              isActive(link.href)
-                ? 'text-primary-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            {link.label}
-          </a>
-        </li>
-      ))}
-    </ul>
+    <div class="flex items-center gap-4 sm:gap-5">
+      <!-- Desktop links -->
+      <ul class="hidden items-center gap-6 sm:flex">
+        {NAV_LINKS.map((link) => (
+          <li>
+            <a
+              href={base + link.href}
+              class={`link-grad text-sm font-medium ${
+                isActive(link.href)
+                  ? 'text-primary-600 dark:text-primary-400'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
 
-    <!-- Mobile toggle -->
-    <button
-      id="menu-toggle"
-      class="inline-flex items-center rounded-md p-2 text-gray-600 hover:bg-gray-100 sm:hidden"
-      aria-label="Toggle menu"
-      aria-expanded="false"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-6 w-6">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
-      </svg>
-    </button>
+      <!-- Light / dark toggle -->
+      <button
+        id="theme-toggle"
+        class="inline-flex items-center rounded-md p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+        aria-label="Toggle dark mode"
+      >
+        <!-- Moon (shown in light mode) -->
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5 dark:hidden">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+        </svg>
+        <!-- Sun (shown in dark mode) -->
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="hidden h-5 w-5 dark:block">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+        </svg>
+      </button>
+
+      <!-- Mobile menu toggle -->
+      <button
+        id="menu-toggle"
+        class="inline-flex items-center rounded-md p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 sm:hidden"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-6 w-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+        </svg>
+      </button>
+    </div>
   </nav>
 
   <!-- Mobile menu -->
-  <ul id="mobile-menu" class="hidden border-t border-gray-100 px-4 pb-4 sm:hidden">
+  <ul id="mobile-menu" class="hidden border-t border-gray-100 bg-white px-4 pb-4 dark:border-gray-800 dark:bg-gray-950 sm:hidden">
     {NAV_LINKS.map((link) => (
       <li>
         <a
           href={base + link.href}
           class={`block py-2 text-sm font-medium ${
-            isActive(link.href) ? 'text-primary-600' : 'text-gray-700 hover:text-gray-900'
+            isActive(link.href)
+              ? 'text-primary-600 dark:text-primary-400'
+              : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
           }`}
         >
           {link.label}
@@ -64,10 +92,18 @@ const isActive = (href: string) => {
 </header>
 
 <script>
-  const toggle = document.getElementById('menu-toggle');
+  // Mobile menu
+  const menuToggle = document.getElementById('menu-toggle');
   const menu = document.getElementById('mobile-menu');
-  toggle?.addEventListener('click', () => {
+  menuToggle?.addEventListener('click', () => {
     const open = menu?.classList.toggle('hidden');
-    toggle.setAttribute('aria-expanded', String(open === false));
+    menuToggle.setAttribute('aria-expanded', String(open === false));
+  });
+
+  // Light / dark theme
+  const themeToggle = document.getElementById('theme-toggle');
+  themeToggle?.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
   });
 </script>

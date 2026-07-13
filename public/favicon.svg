@@ -4,7 +4,7 @@
     <text x="12" y="59">A</text>
     <text transform="translate(31,59) scale(-1,1)">N</text>
     <text x="50" y="59">A</text>
-    <text transform="translate(69,59) scale(-1,1)">N</text>
+    <text x="69" y="59">N</text>
     <text x="88" y="59">A</text>
   </g>
 </svg>

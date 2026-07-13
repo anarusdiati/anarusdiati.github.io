@@ -5,7 +5,7 @@ date: 2026-07-13
 tags: ["Personal"]
 ---
 
-Hi, I'm ANANA. This is where I'll share shorter notes on things I'm building and learning —
+Hi, I'm Nana. This is where I'll share shorter notes on things I'm building and learning —
 AI, natural language processing, data science, and the occasional reflection on
 human-centered technology.
 

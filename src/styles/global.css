@@ -9,10 +9,10 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-white text-gray-800 antialiased;
+    @apply bg-white text-gray-800 antialiased dark:bg-gray-950 dark:text-gray-300;
   }
   h1, h2, h3, h4 {
-    @apply font-bold text-gray-900 tracking-tight;
+    @apply font-bold text-gray-900 tracking-tight dark:text-gray-100;
   }
   a {
     @apply transition-colors;
@@ -28,7 +28,7 @@
     max-width: 44rem;
   }
   .link-underline {
-    @apply text-primary-600 font-medium hover:text-primary-700 underline decoration-primary-200 underline-offset-4 hover:decoration-primary-400;
+    @apply text-primary-600 font-medium hover:text-primary-700 underline decoration-primary-200 underline-offset-4 hover:decoration-primary-400 dark:text-primary-400 dark:hover:text-primary-300;
   }
   /* Simple, readable article styling (mini "prose") */
   .article :where(h2) {
@@ -38,28 +38,28 @@
     @apply mt-8 mb-2 text-xl;
   }
   .article :where(p) {
-    @apply my-4 leading-7 text-gray-700;
+    @apply my-4 leading-7 text-gray-700 dark:text-gray-300;
   }
   .article :where(ul) {
-    @apply my-4 list-disc pl-6 space-y-1 text-gray-700;
+    @apply my-4 list-disc pl-6 space-y-1 text-gray-700 dark:text-gray-300;
   }
   .article :where(ol) {
-    @apply my-4 list-decimal pl-6 space-y-1 text-gray-700;
+    @apply my-4 list-decimal pl-6 space-y-1 text-gray-700 dark:text-gray-300;
   }
   .article :where(a) {
-    @apply text-primary-600 underline underline-offset-4 hover:text-primary-700;
+    @apply text-primary-600 underline underline-offset-4 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300;
   }
   .article :where(code) {
-    @apply rounded bg-gray-100 px-1.5 py-0.5 text-sm text-primary-700;
+    @apply rounded bg-gray-100 px-1.5 py-0.5 text-sm text-primary-700 dark:bg-gray-800 dark:text-primary-300;
   }
   .article :where(pre) {
-    @apply my-5 overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100;
+    @apply my-5 overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100 dark:bg-black;
   }
   .article :where(pre code) {
     @apply bg-transparent p-0 text-gray-100;
   }
   .article :where(blockquote) {
-    @apply my-5 border-l-4 border-primary-200 pl-4 italic text-gray-600;
+    @apply my-5 border-l-4 border-primary-200 pl-4 italic text-gray-600 dark:border-primary-800 dark:text-gray-400;
   }
 }
 
@@ -79,5 +79,120 @@
   .reveal-ready .reveal.in-view {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* ── Periwinkle gradient accents & hover ──────────────────────────────────── */
+
+/* Permanent gradient text — soft but clearly visible periwinkle accent on
+   big headings (lighter → deeper so it reads well on a white background). */
+.text-gradient {
+  background-image: linear-gradient(105deg, #96a1f6 0%, #6470e2 55%, #505bc4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.dark .text-gradient {
+  background-image: linear-gradient(105deg, #c8cefb 0%, #aeb6f9 55%, #96a1f6 100%);
+}
+
+/* Text link that turns into a periwinkle gradient on hover. */
+.link-grad {
+  transition: color 0.25s ease;
+}
+.link-grad:hover {
+  background-image: linear-gradient(to right, #6470e2, #96a1f6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.dark .link-grad:hover {
+  background-image: linear-gradient(to right, #aeb6f9, #c8cefb);
+}
+
+/* Primary button with an animated gradient sweep on hover. */
+.btn-primary {
+  @apply inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-white;
+  background-image: linear-gradient(110deg, #6470e2 0%, #505bc4 45%, #7c86ef 100%);
+  background-size: 200% 100%;
+  background-position: 0% 0;
+  transition: background-position 0.55s ease, box-shadow 0.3s ease;
+}
+.btn-primary:hover {
+  background-position: 100% 0;
+  box-shadow: 0 6px 18px -6px rgba(100, 112, 226, 0.55);
+}
+
+/* Outline button with a soft periwinkle gradient wash that slides in on hover. */
+.btn-outline {
+  @apply inline-flex items-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition dark:border-gray-700 dark:text-gray-300;
+  background-image: linear-gradient(110deg, #eff1fe, #e1e4fd);
+  background-size: 220% 100%;
+  background-position: 220% 0;
+}
+.btn-outline:hover {
+  background-position: 0% 0;
+  @apply border-primary-200 text-primary-700 dark:border-primary-700 dark:text-primary-200;
+}
+.dark .btn-outline {
+  background-image: linear-gradient(110deg, rgba(150, 161, 246, 0.22), rgba(124, 134, 239, 0.14));
+}
+
+/* Card glow: a faint periwinkle gradient wash + soft shadow on hover. */
+.card-hover {
+  position: relative;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.card-hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(150, 161, 246, 0.1), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.card-hover:hover::before {
+  opacity: 1;
+}
+.card-hover:hover {
+  box-shadow: 0 12px 30px -14px rgba(100, 112, 226, 0.42);
+}
+
+/* Filter chips (category buttons): a soft periwinkle gradient slides in on
+   hover — but only for chips that aren't the active one (aria-pressed="false").
+   The active chip keeps its solid accent fill. */
+.filter-chip {
+  background-image: linear-gradient(110deg, #eff1fe, #c8cefb);
+  background-size: 220% 100%;
+  background-position: 220% 0;
+  background-repeat: no-repeat;
+  transition: background-position 0.5s ease, color 0.3s ease;
+}
+.filter-chip[aria-pressed='false']:hover {
+  background-position: 0% 0;
+  color: #505bc4;
+}
+.dark .filter-chip {
+  background-image: linear-gradient(110deg, rgba(150, 161, 246, 0.28), rgba(124, 134, 239, 0.16));
+}
+.dark .filter-chip[aria-pressed='false']:hover {
+  color: #c8cefb;
+}
+
+/* Gentle floating motion for the hero monogram (off if reduced motion). */
+@media (prefers-reduced-motion: no-preference) {
+  .monogram-float {
+    animation: floaty 6s ease-in-out infinite;
+  }
+  @keyframes floaty {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
   }
 }

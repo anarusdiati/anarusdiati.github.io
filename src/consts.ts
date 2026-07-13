@@ -1,6 +1,6 @@
 // Central place for site-wide info. Edit these to make the site yours.
 export const SITE = {
-  name: 'ANANA',
+  name: 'Nana',
   brand: 'ANANA',
   fullName: 'Rokhana D. Rusdiati',
   title: 'Rokhana D. Rusdiati — AI/ML Engineer & Data Scientist',

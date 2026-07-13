@@ -18,14 +18,14 @@ const allTags = Array.from(
 
 <BaseLayout title="Projects" description="Things I've built, filterable by category.">
   <header class="mb-8">
-    <h1 class="text-3xl font-extrabold sm:text-4xl">Projects</h1>
-    <p class="mt-2 text-gray-600">A collection of things I've built. Filter by category.</p>
+    <h1 class="text-gradient inline-block text-3xl font-extrabold sm:text-4xl">Projects</h1>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">A collection of things I've built. Filter by category.</p>
   </header>
 
   <!-- Filter bar -->
   <div id="filter-bar" class="mb-8 flex flex-wrap gap-2">
     <button
-      class="filter-btn rounded-full bg-primary-600 px-3.5 py-1.5 text-sm font-medium text-white"
+      class="filter-btn filter-chip rounded-full bg-primary-600 px-3.5 py-1.5 text-sm font-medium text-white"
       data-tag="all"
       aria-pressed="true"
     >
@@ -33,7 +33,7 @@ const allTags = Array.from(
     </button>
     {allTags.map((tag) => (
       <button
-        class="filter-btn rounded-full bg-gray-100 px-3.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
+        class="filter-btn filter-chip rounded-full bg-gray-100 px-3.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
         data-tag={tag}
         aria-pressed="false"
       >
@@ -56,7 +56,7 @@ const allTags = Array.from(
     ))}
   </div>
 
-  <p id="empty-state" class="hidden py-10 text-center text-gray-500">
+  <p id="empty-state" class="hidden py-10 text-center text-gray-500 dark:text-gray-400">
     No projects with this tag yet.
   </p>
 </BaseLayout>
@@ -67,7 +67,14 @@ const allTags = Array.from(
   const emptyState = document.getElementById('empty-state');
 
   const activeClasses = ['bg-primary-600', 'text-white'];
-  const idleClasses = ['bg-gray-100', 'text-gray-700', 'hover:bg-gray-200'];
+  const idleClasses = [
+    'bg-gray-100',
+    'text-gray-700',
+    'hover:bg-gray-200',
+    'dark:bg-gray-800',
+    'dark:text-gray-300',
+    'dark:hover:bg-gray-700',
+  ];
 
   function setActive(btn: HTMLButtonElement) {
     buttons.forEach((b) => {

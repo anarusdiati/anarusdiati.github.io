@@ -6,10 +6,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const experience = [
   {
-    period: '2026 – Present',
+    period: 'Apr 2026 – Present',
     role: 'AI/ML Engineer',
     org: 'Apple Developer Institute for AIML',
-    place: 'Surabaya',
+    place: 'Surabaya, Indonesia',
     text: 'Selected for an intensive, project-based program focused on artificial intelligence and machine learning. Here I deepen my skills in building and applying ML models and developing AI-powered applications through hands-on learning, mentorship, and collaboration.',
   },
   {
@@ -96,12 +96,12 @@ const skills = [
 
 <BaseLayout title="About" description="About Rokhana D. Rusdiati — AI/ML Engineer and Data Scientist.">
   <header class="mb-8">
-    <h1 class="text-3xl font-extrabold sm:text-4xl">About</h1>
+    <h1 class="text-gradient inline-block text-3xl font-extrabold sm:text-4xl">About</h1>
   </header>
 
   <div class="article">
     <p>
-      Hi, I'm <strong>{SITE.fullName}</strong> — also known as ANANA. I'm an AI/ML Engineer and Data
+      Hi, I'm <strong>{SITE.fullName}</strong> — also known as Nana. I'm an AI/ML Engineer and Data
       Scientist with a foundation in Natural Language Processing and applied research. I
       enjoy working at the intersection of data, technology, and human behavior — building
       thoughtful, interpretable AI systems that support real-world decision-making.
@@ -110,22 +110,25 @@ const skills = [
       I'm currently developing <strong>Cognivia</strong>, an independent AI initiative
       focused on cognition, emotion, and human-centered intelligence.
     </p>
-    <p>
-      <a href={SITE.resumeUrl} target="_blank" rel="noopener">Download my full resume (PDF) ↗</a>
-    </p>
+  </div>
+
+  <div class="mt-6">
+    <a href={SITE.resumeUrl} target="_blank" rel="noopener" class="btn-primary">
+      Download as PDF ↗
+    </a>
   </div>
 
   <!-- Experience -->
   <section class="mt-12">
     <h2 class="text-2xl font-bold">Experience</h2>
-    <div class="mt-6 space-y-6 border-l border-gray-200 pl-6">
+    <div class="mt-6 space-y-6 border-l border-gray-200 dark:border-gray-700 pl-6">
       {experience.map((job) => (
         <div class="relative">
           <span class="absolute -left-[27px] top-1.5 h-3 w-3 rounded-full border-2 border-white bg-primary-500"></span>
-          <p class="text-xs font-medium uppercase tracking-wide text-primary-600">{job.period}</p>
-          <h3 class="mt-1 text-lg font-bold text-gray-900">{job.role}</h3>
-          <p class="text-sm font-medium text-gray-600">{job.org} · {job.place}</p>
-          <p class="mt-2 text-sm leading-6 text-gray-600">{job.text}</p>
+          <p class="text-xs font-medium uppercase tracking-wide text-primary-600 dark:text-primary-400">{job.period}</p>
+          <h3 class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{job.role}</h3>
+          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{job.org} · {job.place}</p>
+          <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-400">{job.text}</p>
         </div>
       ))}
     </div>
@@ -136,11 +139,11 @@ const skills = [
     <h2 class="text-2xl font-bold">Education</h2>
     <div class="mt-6 grid gap-5">
       {education.map((ed) => (
-        <div class="rounded-xl border border-gray-100 p-5 shadow-sm">
-          <p class="text-xs font-medium uppercase tracking-wide text-primary-600">{ed.period}</p>
+        <div class="rounded-xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-5 shadow-sm">
+          <p class="text-xs font-medium uppercase tracking-wide text-primary-600 dark:text-primary-400">{ed.period}</p>
           <h3 class="mt-1 text-lg font-bold">{ed.degree}</h3>
-          <p class="text-sm font-medium text-gray-600">{ed.school}</p>
-          <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-600">
+          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{ed.school}</p>
+          <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-600 dark:text-gray-400">
             {ed.details.map((d) => <li>{d}</li>)}
           </ul>
         </div>
@@ -156,17 +159,17 @@ const skills = [
         s.tag ? (
           <a
             href={`${base}/projects/?tag=${encodeURIComponent(s.tag)}`}
-            class="rounded-full bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700 transition hover:bg-primary-600 hover:text-white"
+            class="rounded-full bg-primary-50 dark:bg-primary-500/15 px-3 py-1 text-sm font-medium text-primary-700 dark:text-primary-300 transition hover:bg-primary-600 hover:text-white"
           >
             {s.name}
           </a>
         ) : (
-          <span class="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">{s.name}</span>
+          <span class="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1 text-sm font-medium text-gray-600 dark:text-gray-400">{s.name}</span>
         )
       )}
     </div>
-    <p class="mt-3 text-xs text-gray-400">Tip: the blue skills link to related projects.</p>
-    <p class="mt-4 text-sm text-gray-600">
+    <p class="mt-3 text-xs text-gray-400 dark:text-gray-500">Tip: the blue skills link to related projects.</p>
+    <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
       Languages: Indonesian (native / bilingual) · English (upper-intermediate)
     </p>
   </section>
@@ -174,7 +177,7 @@ const skills = [
   <!-- Contact -->
   <section class="mt-12">
     <h2 class="text-2xl font-bold">Get in touch</h2>
-    <p class="mt-3 text-gray-600">
+    <p class="mt-3 text-gray-600 dark:text-gray-400">
       The best way to reach me is by
       <a class="link-underline" href={`mailto:${SITE.email}`}>email</a>. You can also find me on
       <a class="link-underline" href={SITE.socials.linkedin} target="_blank" rel="noopener">LinkedIn</a>,
