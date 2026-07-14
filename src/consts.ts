@@ -30,8 +30,8 @@ export const SITE = {
 //   lyketApiKey:     your PUBLIC Lyket API key (safe to expose). Sign up free at
 //                    https://lyket.dev, then restrict it to your domain in settings.
 export const ANALYTICS = {
-  goatcounterCode: '',
-  lyketApiKey: '',
+  goatcounterCode: 'anarusdiati',
+  lyketApiKey: 'pt_27a79e2c61540008bc26f6d40f3953',
 };
 
 export const NAV_LINKS = [

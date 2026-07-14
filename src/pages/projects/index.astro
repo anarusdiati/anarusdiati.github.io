@@ -48,7 +48,7 @@ const allTags = Array.from(
       <div class="project-item" data-tags={p.data.tags.join(',')}>
         <ProjectCard
           title={p.data.title}
-          description={p.data.description}
+          description={p.data.description.replace(/\.$/, '')}
           tags={p.data.tags}
           url={`${base}/projects/${p.slug}/`}
         />

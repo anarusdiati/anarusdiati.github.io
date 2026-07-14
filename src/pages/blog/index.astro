@@ -22,7 +22,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
       {posts.map((post) => (
         <BlogCard
           title={post.data.title}
-          description={post.data.description}
+          description={post.data.description.replace(/\.$/, '')}
           date={post.data.date}
           tags={post.data.tags}
           url={`${base}/blog/${post.slug}/`}

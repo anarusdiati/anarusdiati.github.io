@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Tag from '../../components/Tag.astro';
+import PostStats from '../../components/PostStats.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -14,6 +15,7 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 const { Content, headings } = await project.render();
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const projectUrl = new URL(Astro.url.pathname, Astro.site).href;
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
 const formatted = project.data.date
   ? project.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
@@ -25,27 +27,16 @@ const formatted = project.data.date
 
   <header class="mt-4 mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
     <h1 class="text-3xl font-extrabold leading-tight sm:text-4xl">{project.data.title}</h1>
-    <p class="mt-3 text-lg text-gray-600 dark:text-gray-400">{project.data.description}</p>
+    <p class="mt-3 text-lg text-gray-600 dark:text-gray-400">{project.data.description.replace(/\.$/, '')}</p>
     <div class="mt-4 flex flex-wrap items-center gap-3">
       {formatted && <time class="text-sm text-gray-500 dark:text-gray-400">{formatted}</time>}
       <div class="flex flex-wrap gap-1.5">
         {project.data.tags.map((t) => <Tag label={t} />)}
       </div>
     </div>
-    {(project.data.link || project.data.github) && (
-      <div class="mt-5 flex flex-wrap gap-3">
-        {project.data.link && (
-          <a href={project.data.link} target="_blank" rel="noopener" class="btn-primary">
-            View project ↗
-          </a>
-        )}
-        {project.data.github && (
-          <a href={project.data.github} target="_blank" rel="noopener" class="btn-outline">
-            Source code ↗
-          </a>
-        )}
-      </div>
-    )}
+    <div class="mt-5">
+      <PostStats id={project.slug} title={project.data.title} url={projectUrl} namespace="project" showLike={false} />
+    </div>
   </header>
 
   <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_220px] lg:gap-14">
@@ -71,6 +62,21 @@ const formatted = project.data.date
       </aside>
     )}
   </div>
+
+  {(project.data.link || project.data.github) && (
+    <div class="mt-12 flex flex-wrap gap-3">
+      {project.data.link && (
+        <a href={project.data.link} target="_blank" rel="noopener" class="btn-primary">
+          View project ↗
+        </a>
+      )}
+      {project.data.github && (
+        <a href={project.data.github} target="_blank" rel="noopener" class="btn-outline">
+          Source code ↗
+        </a>
+      )}
+    </div>
+  )}
 
   <div class="mt-12 border-t border-gray-100 dark:border-gray-800 pt-6">
     <a href={`${base}/projects/`} class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">← Back to projects</a>
