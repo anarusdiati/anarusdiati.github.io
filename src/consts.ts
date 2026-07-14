@@ -32,6 +32,9 @@ export const SITE = {
 export const ANALYTICS = {
   goatcounterCode: 'anarusdiati',
   lyketApiKey: 'pt_27a79e2c61540008bc26f6d40f3953',
+  // Set to true to show the view counts on posts. Data keeps collecting in
+  // GoatCounter regardless — this only controls whether the number is visible.
+  showViews: false,
 };
 
 export const NAV_LINKS = [

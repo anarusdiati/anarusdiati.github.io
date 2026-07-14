@@ -17,7 +17,7 @@ const shareWhatsApp = `https://api.whatsapp.com/send?text=${enc(`${title} ${url}
 ---
 
 <div class="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-gray-500 dark:text-gray-400">
-  {ANALYTICS.goatcounterCode && (
+  {ANALYTICS.showViews && ANALYTICS.goatcounterCode && (
     <span class="inline-flex items-center gap-1.5">
       <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-7.5 9.75-7.5 9.75 7.5 9.75 7.5-3.75 7.5-9.75 7.5S2.25 12 2.25 12z" />

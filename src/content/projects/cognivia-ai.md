@@ -1,7 +1,7 @@
 ---
 title: "Cognivia AI"
 description: "An AI-powered space for structuring thoughts, reducing cognitive overload, and restoring clarity."
-tags: ["Artificial Intelligence", "Research"]
+tags: ["Artificial Intelligence", "Research", "Human-Centered AI"]
 date: 2026-01-15
 link: "https://anarusdiati.wixsite.com/cognivia-ai"
 featured: true
