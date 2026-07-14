@@ -1,0 +1,302 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Tag from '../../components/Tag.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<BaseLayout title="Self-Driving Snake" description="Play classic Snake, or let an AI drive itself to the food using pathfinding.">
+  <a href={`${base}/play`} class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">← Back to games</a>
+
+  <header class="mt-4 mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
+    <h1 class="text-3xl font-extrabold leading-tight sm:text-4xl">Self-Driving Snake</h1>
+    <p class="mt-3 text-lg text-gray-500 dark:text-gray-400">
+      Play it yourself with the arrow keys, or switch on <strong>Autopilot</strong> and watch the AI take
+      over. It sticks to a safe route that covers the whole board and cuts toward the food when it can.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-1.5">
+      <Tag label="Pathfinding" />
+      <Tag label="Hamiltonian cycle" />
+    </div>
+  </header>
+
+  <div class="grid items-start gap-6 lg:grid-cols-[auto_1fr] lg:gap-8">
+    <!-- Board -->
+    <div>
+      <div class="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <canvas id="board" width="384" height="384" class="mx-auto block aspect-square w-full max-w-[384px] rounded-xl"></canvas>
+      </div>
+
+      <!-- On-screen dpad (mobile) -->
+      <div class="mt-4 grid grid-cols-3 gap-1.5 sm:hidden" style="max-width:180px;margin-inline:auto;">
+        <div></div>
+        <button class="dpad rounded-lg bg-gray-100 py-2 text-lg dark:bg-gray-800" data-dir="up">↑</button>
+        <div></div>
+        <button class="dpad rounded-lg bg-gray-100 py-2 text-lg dark:bg-gray-800" data-dir="left">←</button>
+        <button class="dpad rounded-lg bg-gray-100 py-2 text-lg dark:bg-gray-800" data-dir="down">↓</button>
+        <button class="dpad rounded-lg bg-gray-100 py-2 text-lg dark:bg-gray-800" data-dir="right">→</button>
+      </div>
+    </div>
+
+    <!-- Side panel -->
+    <div class="rounded-2xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-5 shadow-sm">
+      <div class="grid grid-cols-2 gap-3 text-center">
+        <div class="rounded-xl border border-gray-100 dark:border-gray-800 p-3">
+          <p class="text-xs font-medium uppercase tracking-wide text-primary-600 dark:text-primary-400">Score</p>
+          <p id="score" class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">0</p>
+        </div>
+        <div class="rounded-xl border border-gray-100 dark:border-gray-800 p-3">
+          <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Best</p>
+          <p id="best" class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">0</p>
+        </div>
+      </div>
+
+      <p id="status" class="mt-4 text-center text-sm font-medium text-gray-600 dark:text-gray-400 lg:text-left">
+        Press Start, then use the arrow keys.
+      </p>
+
+      <div class="mt-4 flex flex-wrap gap-2 lg:flex-col">
+        <button id="start" class="btn-primary justify-center">Start</button>
+        <button id="auto" class="rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800" aria-pressed="false">
+          🤖 Autopilot: off
+        </button>
+        <button id="restart" class="rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+          Restart
+        </button>
+      </div>
+
+      <p class="mt-4 text-xs leading-5 text-gray-400">
+        On Autopilot, the AI plans along a Hamiltonian cycle, a loop that visits every cell exactly
+        once, so it can never trap itself. It cuts corners toward the apple whenever that's safe.
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const W = 16, H = 16;
+  const canvas = document.getElementById('board') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+  const CELL = canvas.width / W;
+  const scoreEl = document.getElementById('score')!;
+  const bestEl = document.getElementById('best')!;
+  const statusEl = document.getElementById('status')!;
+  const startBtn = document.getElementById('start')!;
+  const autoBtn = document.getElementById('auto')!;
+  const restartBtn = document.getElementById('restart')!;
+
+  const idx = (x: number, y: number) => y * W + x;
+  const NB = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+  // ── Hamiltonian cycle (W must be even) ───────────────────────────────────
+  const buildCycle = () => {
+    const cells: [number, number][] = [];
+    for (let x = 0; x < W; x++) cells.push([x, 0]);
+    for (let x = W - 1; x >= 1; x--) {
+      if ((W - 1 - x) % 2 === 0) for (let y = 1; y < H; y++) cells.push([x, y]);
+      else for (let y = H - 1; y >= 1; y--) cells.push([x, y]);
+    }
+    for (let y = H - 1; y >= 1; y--) cells.push([0, y]);
+    return cells;
+  };
+  const SIZE = W * H;
+  const cycle = buildCycle();
+  const pos = new Int32Array(SIZE);
+  cycle.forEach(([x, y], i) => (pos[idx(x, y)] = i));
+
+  // ── Game state ────────────────────────────────────────────────────────────
+  let snake: [number, number][] = [];
+  let food: [number, number] = [0, 0];
+  let dir: [number, number] = [1, 0];
+  let queued: [number, number] | null = null;
+  let running = false, over = false, auto = false;
+  let timer: number | null = null;
+  let score = 0;
+  let best = Number(localStorage.getItem('snake-best') || 0);
+  bestEl.textContent = String(best);
+
+  const freeCells = () => {
+    const occ = new Set(snake.map((c) => idx(c[0], c[1])));
+    const free: [number, number][] = [];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (!occ.has(idx(x, y))) free.push([x, y]);
+    return free;
+  };
+  const placeFood = () => {
+    const free = freeCells();
+    if (!free.length) return false;
+    food = free[Math.floor(Math.random() * free.length)];
+    return true;
+  };
+
+  const reset = () => {
+    snake = [[8, 8], [7, 8], [6, 8]];
+    dir = [1, 0]; queued = null; score = 0; over = false;
+    scoreEl.textContent = '0';
+    placeFood();
+    draw();
+  };
+
+  // ── AI: Hamiltonian follow + safe shortcuts, with a survival fallback ─────
+  const floodCount = (sx: number, sy: number, blocked: Set<number>) => {
+    if (blocked.has(idx(sx, sy))) return 0;
+    const seen = new Uint8Array(SIZE); const q = [[sx, sy]]; seen[idx(sx, sy)] = 1; let qi = 0, c = 0;
+    while (qi < q.length) {
+      const [x, y] = q[qi++]; c++;
+      for (const [dx, dy] of NB) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+        const k = idx(nx, ny); if (seen[k] || blocked.has(k)) continue; seen[k] = 1; q.push([nx, ny]);
+      }
+    }
+    return c;
+  };
+
+  const aiDir = (): [number, number] => {
+    const head = snake[0], tail = snake[snake.length - 1];
+    const hi = pos[idx(head[0], head[1])], fi = pos[idx(food[0], food[1])], ti = pos[idx(tail[0], tail[1])];
+    const occ = new Set(snake.map((c) => idx(c[0], c[1])));
+    const tailK = idx(tail[0], tail[1]);
+    const nextIdx = (hi + 1) % SIZE;
+    const maxShort = ((ti - hi + SIZE) % SIZE) || SIZE;
+    const allowShort = snake.length < SIZE * 0.5;
+
+    let follow: [number, number] | null = null;
+    let best: [number, number] | null = null, bestScore = -1;
+    for (const [dx, dy] of NB) {
+      const nx = head[0] + dx, ny = head[1] + dy;
+      if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+      const k = idx(nx, ny);
+      if (occ.has(k) && k !== tailK) continue;
+      const ci = pos[k];
+      if (ci === nextIdx) follow = [dx, dy];
+      if (allowShort) {
+        const d = (ci - hi + SIZE) % SIZE;
+        if (d > 0 && d < maxShort) {
+          const fd = (fi - ci + SIZE) % SIZE;
+          const s = SIZE - fd;
+          if (s > bestScore) { bestScore = s; best = [dx, dy]; }
+        }
+      }
+    }
+    const pick = best || follow;
+    if (pick) return pick;
+
+    // Fallback (e.g. after manual play left the body off-cycle): survive.
+    let sBest: [number, number] | null = null, sMax = -1;
+    for (const [dx, dy] of NB) {
+      const nx = head[0] + dx, ny = head[1] + dy;
+      if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+      const k = idx(nx, ny);
+      if (occ.has(k) && k !== tailK) continue;
+      const blocked = new Set<number>();
+      for (let i = 0; i < snake.length - 1; i++) blocked.add(idx(snake[i][0], snake[i][1]));
+      const space = floodCount(nx, ny, blocked);
+      if (space > sMax) { sMax = space; sBest = [dx, dy]; }
+    }
+    return sBest || dir;
+  };
+
+  // ── Tick ──────────────────────────────────────────────────────────────────
+  const step = () => {
+    if (auto) dir = aiDir();
+    else if (queued) { dir = queued; queued = null; }
+
+    const nx = snake[0][0] + dir[0], ny = snake[0][1] + dir[1];
+
+    // Wall
+    if (nx < 0 || nx >= W || ny < 0 || ny >= H) return gameOver();
+    const eating = nx === food[0] && ny === food[1];
+    // Self collision (tail moves away unless eating)
+    const limit = eating ? snake.length : snake.length - 1;
+    for (let i = 0; i < limit; i++) if (snake[i][0] === nx && snake[i][1] === ny) return gameOver();
+
+    snake.unshift([nx, ny]);
+    if (eating) {
+      score++;
+      scoreEl.textContent = String(score);
+      if (score > best) { best = score; bestEl.textContent = String(best); localStorage.setItem('snake-best', String(best)); }
+      if (!placeFood()) { draw(); return win(); }
+    } else {
+      snake.pop();
+    }
+    draw();
+  };
+
+  const win = () => { stop(); over = true; statusEl.textContent = 'Perfect run! The whole board is filled 🏆'; };
+  const gameOver = () => { stop(); over = true; statusEl.textContent = `Game over. You scored ${score}. Press Restart.`; draw(true); };
+
+  const loop = () => { if (running) step(); };
+  const start = () => {
+    if (over) reset();
+    if (running) return;
+    running = true;
+    startBtn.textContent = 'Pause';
+    statusEl.textContent = auto ? 'Autopilot driving…' : 'Go! Steer with the arrow keys.';
+    schedule();
+  };
+  const pause = () => { running = false; startBtn.textContent = 'Start'; statusEl.textContent = 'Paused.'; if (timer) clearInterval(timer); };
+  const stop = () => { running = false; startBtn.textContent = 'Start'; if (timer) clearInterval(timer); };
+  const schedule = () => { if (timer) clearInterval(timer); timer = window.setInterval(loop, auto ? 55 : 110); };
+
+  // ── Draw ────────────────────────────────────────────────────────────────
+  const draw = (dead = false) => {
+    const dark = document.documentElement.classList.contains('dark');
+    ctx.fillStyle = dark ? '#0f172a' : '#f8fafc';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // subtle grid
+    ctx.strokeStyle = dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)';
+    for (let i = 1; i < W; i++) {
+      ctx.beginPath(); ctx.moveTo(i * CELL, 0); ctx.lineTo(i * CELL, canvas.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i * CELL); ctx.lineTo(canvas.width, i * CELL); ctx.stroke();
+    }
+    // food
+    const [fx, fy] = food;
+    ctx.fillStyle = '#f43f5e';
+    roundRect(fx * CELL + 3, fy * CELL + 3, CELL - 6, CELL - 6, 5); ctx.fill();
+    // snake
+    snake.forEach((c, i) => {
+      const head = i === 0;
+      ctx.fillStyle = dead ? '#94a3b8' : head ? '#4f46e5' : '#818cf8';
+      roundRect(c[0] * CELL + 1.5, c[1] * CELL + 1.5, CELL - 3, CELL - 3, 5); ctx.fill();
+    });
+  };
+  const roundRect = (x: number, y: number, w: number, h: number, r: number) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  };
+
+  // ── Input ──────────────────────────────────────────────────────────────
+  const turn = (d: [number, number]) => {
+    if (auto || !running) return;
+    // no reversing
+    if (d[0] === -dir[0] && d[1] === -dir[1]) return;
+    queued = d;
+  };
+  const KEYS: Record<string, [number, number]> = {
+    ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0],
+    w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0],
+  };
+  window.addEventListener('keydown', (e) => {
+    const k = KEYS[e.key];
+    if (k) { e.preventDefault(); turn(k); }
+    else if (e.key === ' ') { e.preventDefault(); running ? pause() : start(); }
+  });
+  document.querySelectorAll<HTMLButtonElement>('.dpad').forEach((b) =>
+    b.addEventListener('click', () => turn(KEYS[{ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[b.dataset.dir!]!]))
+  );
+
+  startBtn.addEventListener('click', () => (running ? pause() : start()));
+  restartBtn.addEventListener('click', () => { stop(); reset(); statusEl.textContent = 'Press Start, then use the arrow keys.'; });
+  autoBtn.addEventListener('click', () => {
+    auto = !auto;
+    autoBtn.setAttribute('aria-pressed', String(auto));
+    autoBtn.textContent = auto ? '🤖 Autopilot: on' : '🤖 Autopilot: off';
+    if (running) { statusEl.textContent = auto ? 'Autopilot driving…' : 'Go! Steer with the arrow keys.'; schedule(); }
+  });
+
+  reset();
+</script>

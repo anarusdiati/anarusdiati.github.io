@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const games = [
+  {
+    href: '/play/tic-tac-toe',
+    emoji: '⭕',
+    title: 'Tic-Tac-Toe',
+    tech: 'Minimax search',
+    text: "The classic 3×3, except the AI never slips up. On Impossible, a draw is the best you'll get.",
+  },
+  {
+    href: '/play/rps',
+    emoji: '✊',
+    title: 'Rock · Paper · Scissors',
+    tech: 'Learning AI (Markov model)',
+    text: 'The AI picks up on your habits as you play and tries to call your next move. Think you can stay unpredictable?',
+  },
+  {
+    href: '/play/human-or-ai',
+    emoji: '🤖',
+    title: 'Human or AI?',
+    tech: 'NLP · Text classification',
+    text: "Was this written by a person or a machine? Play a few rounds and you'll start noticing the giveaways.",
+  },
+  {
+    href: '/play/snake',
+    emoji: '🐍',
+    title: 'Self-Driving Snake',
+    tech: 'Pathfinding · BFS',
+    text: 'Play Snake the normal way, or switch on Autopilot and watch the AI find the food all on its own.',
+  },
+];
+---
+
+<BaseLayout title="Play" description="Small browser games I built, each powered by a different AI technique.">
+  <header class="mb-8">
+    <h1 class="text-gradient inline-block text-3xl font-extrabold sm:text-4xl">Play</h1>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">
+      A few little games I made for fun, each one running on a different AI trick under the hood. Take a
+      break and see if you can beat them.
+    </p>
+  </header>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    {games.map((g) => (
+      <a
+        href={`${base}${g.href}`}
+        class="group rounded-2xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md dark:hover:border-primary-500/40"
+      >
+        <div class="text-4xl">{g.emoji}</div>
+        <h2 class="mt-3 text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400">
+          {g.title}
+        </h2>
+        <span class="mt-1 inline-block rounded-full bg-primary-50 dark:bg-primary-500/15 px-2.5 py-0.5 text-xs font-medium text-primary-700 dark:text-primary-300">
+          {g.tech}
+        </span>
+        <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400">{g.text}</p>
+        <span class="mt-4 inline-block text-sm font-medium text-primary-600 dark:text-primary-400">Play →</span>
+      </a>
+    ))}
+  </div>
+</BaseLayout>

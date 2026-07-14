@@ -1,0 +1,261 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Tag from '../../components/Tag.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<BaseLayout title="Tic-Tac-Toe" description="Take a break and play Tic-Tac-Toe against a small AI built with the minimax algorithm.">
+  <a href={`${base}/play`} class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">← Back to games</a>
+
+  <header class="mt-4 mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
+    <h1 class="text-3xl font-extrabold leading-tight sm:text-4xl">Tic-Tac-Toe</h1>
+    <p class="mt-3 text-lg text-gray-500 dark:text-gray-400">
+      A quick game against a tiny AI. Turn on Impossible and it plays flawlessly using the minimax
+      algorithm, so the best you can hope for is a draw.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-1.5">
+      <Tag label="Game AI" />
+      <Tag label="Minimax search" />
+    </div>
+  </header>
+
+  <div class="mx-auto max-w-md">
+    <!-- Scoreboard -->
+    <div class="mb-6 grid grid-cols-3 gap-3 text-center">
+      <div class="rounded-xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-primary-600 dark:text-primary-400">You (X)</p>
+        <p id="score-you" class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">0</p>
+      </div>
+      <div class="rounded-xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Draws</p>
+        <p id="score-draw" class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">0</p>
+      </div>
+      <div class="rounded-xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-rose-500 dark:text-rose-400">AI (O)</p>
+        <p id="score-ai" class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">0</p>
+      </div>
+    </div>
+
+    <!-- Difficulty -->
+    <div class="mb-4 flex items-center justify-center gap-2">
+      <button
+        class="diff-btn filter-chip rounded-full bg-gray-100 px-3.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+        data-diff="easy"
+        aria-pressed="false"
+      >
+        Easy
+      </button>
+      <button
+        class="diff-btn filter-chip rounded-full bg-primary-600 px-3.5 py-1.5 text-sm font-medium text-white"
+        data-diff="impossible"
+        aria-pressed="true"
+      >
+        Impossible
+      </button>
+    </div>
+
+    <!-- Status -->
+    <p id="status" class="mb-4 text-center text-sm font-medium text-gray-600 dark:text-gray-400" aria-live="polite">
+      Your move. You're X.
+    </p>
+
+    <!-- Board -->
+    <div id="board" class="mx-auto grid aspect-square w-full max-w-xs grid-cols-3 gap-2.5">
+      {Array.from({ length: 9 }).map((_, i) => (
+        <button
+          class="cell flex aspect-square items-center justify-center rounded-2xl border border-gray-200 bg-white text-4xl font-extrabold text-gray-900 shadow-sm transition hover:bg-primary-50 disabled:cursor-not-allowed dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800 sm:text-5xl"
+          data-i={i}
+          aria-label={`Cell ${i + 1}`}
+        ></button>
+      ))}
+    </div>
+
+    <!-- Controls -->
+    <div class="mt-6 flex items-center justify-center gap-3">
+      <button id="reset" class="btn-primary">New game</button>
+      <button
+        id="reset-scores"
+        class="rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+      >
+        Reset scores
+      </button>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  type Player = 'X' | 'O';
+  type Cell = Player | '';
+
+  const HUMAN: Player = 'X';
+  const AI: Player = 'O';
+
+  const WINS = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // cols
+    [0, 4, 8], [2, 4, 6],            // diagonals
+  ];
+
+  const boardEl = document.getElementById('board')!;
+  const cells = Array.from(document.querySelectorAll<HTMLButtonElement>('.cell'));
+  const statusEl = document.getElementById('status')!;
+  const scoreYouEl = document.getElementById('score-you')!;
+  const scoreAiEl = document.getElementById('score-ai')!;
+  const scoreDrawEl = document.getElementById('score-draw')!;
+  const resetBtn = document.getElementById('reset')!;
+  const resetScoresBtn = document.getElementById('reset-scores')!;
+  const diffBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.diff-btn'));
+
+  let board: Cell[] = Array(9).fill('');
+  let locked = false; // true while AI "thinks" or game over
+  let difficulty: 'easy' | 'impossible' = 'impossible';
+  const scores = { you: 0, ai: 0, draw: 0 };
+
+  const winner = (b: Cell[]): Player | 'draw' | null => {
+    for (const [a, c, d] of WINS) {
+      if (b[a] && b[a] === b[c] && b[a] === b[d]) return b[a] as Player;
+    }
+    return b.every((x) => x !== '') ? 'draw' : null;
+  };
+
+  const emptyIdx = (b: Cell[]) => b.map((v, i) => (v === '' ? i : -1)).filter((i) => i >= 0);
+
+  // Minimax: returns a score from the AI's perspective. Depth rewards faster wins
+  // and slower losses so the AI closes out games quickly.
+  const minimax = (b: Cell[], turn: Player, depth: number): number => {
+    const w = winner(b);
+    if (w === AI) return 10 - depth;
+    if (w === HUMAN) return depth - 10;
+    if (w === 'draw') return 0;
+
+    const scoresList = emptyIdx(b).map((i) => {
+      b[i] = turn;
+      const s = minimax(b, turn === AI ? HUMAN : AI, depth + 1);
+      b[i] = '';
+      return s;
+    });
+    return turn === AI ? Math.max(...scoresList) : Math.min(...scoresList);
+  };
+
+  const bestMove = (b: Cell[]): number => {
+    let best = -Infinity;
+    let move = -1;
+    for (const i of emptyIdx(b)) {
+      b[i] = AI;
+      const s = minimax(b, HUMAN, 0);
+      b[i] = '';
+      if (s > best) {
+        best = s;
+        move = i;
+      }
+    }
+    return move;
+  };
+
+  const randomMove = (b: Cell[]): number => {
+    const opts = emptyIdx(b);
+    return opts[Math.floor(Math.random() * opts.length)];
+  };
+
+  const render = () => {
+    cells.forEach((cell, i) => {
+      cell.textContent = board[i];
+      cell.disabled = locked || board[i] !== '';
+      cell.classList.remove('text-primary-600', 'dark:text-primary-400', 'text-rose-500', 'dark:text-rose-400');
+      if (board[i] === 'X') cell.classList.add('text-primary-600', 'dark:text-primary-400');
+      if (board[i] === 'O') cell.classList.add('text-rose-500', 'dark:text-rose-400');
+    });
+  };
+
+  const highlightWin = (line: number[]) => {
+    line.forEach((i) => cells[i].classList.add('ring-2', 'ring-primary-500', 'ring-offset-2', 'dark:ring-offset-gray-950'));
+  };
+
+  const winningLine = (b: Cell[]): number[] | null => {
+    for (const line of WINS) {
+      const [a, c, d] = line;
+      if (b[a] && b[a] === b[c] && b[a] === b[d]) return line;
+    }
+    return null;
+  };
+
+  const setStatus = (msg: string) => (statusEl.textContent = msg);
+
+  const finish = (result: Player | 'draw') => {
+    locked = true;
+    const line = winningLine(board);
+    if (line) highlightWin(line);
+    if (result === HUMAN) {
+      scores.you++;
+      setStatus('You win! 🎉 Nice one.');
+    } else if (result === AI) {
+      scores.ai++;
+      setStatus('AI wins this round. Try again?');
+    } else {
+      scores.draw++;
+      setStatus("It's a draw. Well played.");
+    }
+    scoreYouEl.textContent = String(scores.you);
+    scoreAiEl.textContent = String(scores.ai);
+    scoreDrawEl.textContent = String(scores.draw);
+    render();
+  };
+
+  const aiTurn = () => {
+    locked = true;
+    render();
+    setStatus('AI is thinking…');
+    window.setTimeout(() => {
+      const move = difficulty === 'impossible' ? bestMove(board) : randomMove(board);
+      board[move] = AI;
+      const w = winner(board);
+      if (w) return finish(w);
+      locked = false;
+      setStatus('Your move. You’re X.');
+      render();
+    }, 350);
+  };
+
+  const play = (i: number) => {
+    if (locked || board[i] !== '') return;
+    board[i] = HUMAN;
+    const w = winner(board);
+    if (w) return finish(w);
+    aiTurn();
+  };
+
+  const newGame = () => {
+    board = Array(9).fill('');
+    locked = false;
+    cells.forEach((c) => c.classList.remove('ring-2', 'ring-primary-500', 'ring-offset-2', 'dark:ring-offset-gray-950'));
+    setStatus('Your move. You’re X.');
+    render();
+  };
+
+  cells.forEach((cell, i) => cell.addEventListener('click', () => play(i)));
+  resetBtn.addEventListener('click', newGame);
+  resetScoresBtn.addEventListener('click', () => {
+    scores.you = scores.ai = scores.draw = 0;
+    scoreYouEl.textContent = scoreAiEl.textContent = scoreDrawEl.textContent = '0';
+    newGame();
+  });
+
+  diffBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      difficulty = btn.dataset.diff as 'easy' | 'impossible';
+      diffBtns.forEach((b) => {
+        const active = b === btn;
+        b.setAttribute('aria-pressed', String(active));
+        b.classList.toggle('bg-primary-600', active);
+        b.classList.toggle('text-white', active);
+        b.classList.toggle('bg-gray-100', !active);
+        b.classList.toggle('text-gray-700', !active);
+        b.classList.toggle('dark:bg-gray-800', !active);
+        b.classList.toggle('dark:text-gray-300', !active);
+      });
+      newGame();
+    });
+  });
+
+  render();
+</script>

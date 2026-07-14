@@ -1,0 +1,285 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Tag from '../../components/Tag.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<BaseLayout title="Rock Paper Scissors" description="Rock-Paper-Scissors against an AI that learns your patterns with a Markov model.">
+  <a href={`${base}/play`} class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">← Back to games</a>
+
+  <header class="mt-4 mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
+    <h1 class="text-3xl font-extrabold leading-tight sm:text-4xl">Rock · Paper · Scissors</h1>
+    <p class="mt-3 text-lg text-gray-500 dark:text-gray-400">
+      As you play, the AI builds a little model of your habits and tries to guess what you'll throw
+      next. We're all more predictable than we think, so staying random is tougher than it sounds.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-1.5">
+      <Tag label="Learning AI" />
+      <Tag label="Markov model" />
+    </div>
+  </header>
+
+  <div class="grid items-start gap-6 lg:grid-cols-2 lg:gap-8">
+    <!-- Left column: the game -->
+    <div>
+    <!-- Scoreboard -->
+    <div class="mb-6 grid grid-cols-3 gap-3 text-center">
+      <div class="rounded-xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-primary-600 dark:text-primary-400">You</p>
+        <p id="score-you" class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">0</p>
+      </div>
+      <div class="rounded-xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Ties</p>
+        <p id="score-tie" class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">0</p>
+      </div>
+      <div class="rounded-xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-rose-500 dark:text-rose-400">AI</p>
+        <p id="score-ai" class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">0</p>
+      </div>
+    </div>
+
+    <!-- Arena -->
+    <div class="mb-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-5 text-center shadow-sm">
+      <div>
+        <p class="text-xs font-medium uppercase tracking-wide text-gray-400">You</p>
+        <div id="you-move" class="mt-1 text-5xl">🫳</div>
+      </div>
+      <div class="text-sm font-bold text-gray-400">vs</div>
+      <div>
+        <p class="text-xs font-medium uppercase tracking-wide text-gray-400">AI</p>
+        <div id="ai-move" class="mt-1 text-5xl">🤖</div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <p id="result" class="mb-4 text-center text-sm font-medium text-gray-600 dark:text-gray-400" aria-live="polite">
+      Make your move.
+    </p>
+
+    <!-- Move buttons -->
+    <div class="grid grid-cols-3 gap-2.5">
+      <button class="move-btn flex flex-col items-center rounded-2xl border border-gray-200 bg-white py-4 text-4xl shadow-sm transition hover:-translate-y-0.5 hover:bg-primary-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800" data-move="0" aria-label="Rock">🪨<span class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">Rock</span></button>
+      <button class="move-btn flex flex-col items-center rounded-2xl border border-gray-200 bg-white py-4 text-4xl shadow-sm transition hover:-translate-y-0.5 hover:bg-primary-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800" data-move="1" aria-label="Paper">📄<span class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">Paper</span></button>
+      <button class="move-btn flex flex-col items-center rounded-2xl border border-gray-200 bg-white py-4 text-4xl shadow-sm transition hover:-translate-y-0.5 hover:bg-primary-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800" data-move="2" aria-label="Scissors">✂️<span class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">Scissors</span></button>
+    </div>
+
+      <!-- Controls -->
+      <div class="mt-6 flex items-center justify-center lg:justify-start">
+        <button id="reset" class="rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+          Reset &amp; forget everything
+        </button>
+      </div>
+    </div>
+    <!-- end left column -->
+
+    <!-- Right column: graph / AI brain -->
+    <div class="rounded-2xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-5 shadow-sm lg:sticky lg:top-20">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-bold text-gray-900 dark:text-gray-100">🧠 Inside the AI's head</h2>
+        <span id="rounds" class="text-xs text-gray-400">0 rounds</span>
+      </div>
+
+      <p id="prediction" class="mt-3 text-sm text-gray-600 dark:text-gray-400">
+        Still warming up. Play a few rounds so I can spot your patterns.
+      </p>
+
+      <!-- AI win-rate bar -->
+      <div class="mt-4">
+        <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+          <span>AI win rate</span>
+          <span id="winrate-label">n/a</span>
+        </div>
+        <div class="mt-1 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+          <div id="winrate-bar" class="h-full w-0 rounded-full bg-rose-500 transition-all duration-500"></div>
+        </div>
+        <p class="mt-1 text-[11px] text-gray-400">Random guessing would sit around 33%. Above that means the AI is reading you.</p>
+      </div>
+
+      <!-- Sparkline -->
+      <svg id="spark" class="mt-4 h-16 w-full" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="0" y1="26.8" x2="100" y2="26.8" stroke="currentColor" stroke-width="0.4" class="text-gray-300 dark:text-gray-700" stroke-dasharray="2 2" />
+        <polyline id="spark-line" fill="none" stroke="currentColor" stroke-width="1.4" class="text-rose-500" points="" />
+      </svg>
+    </div>
+    <!-- end right column -->
+  </div>
+</BaseLayout>
+
+<script>
+  // 0 = Rock 🪨, 1 = Paper 📄, 2 = Scissors ✂️
+  const EMOJI = ['🪨', '📄', '✂️'];
+  const NAME = ['Rock', 'Paper', 'Scissors'];
+  const counter = (m: number) => (m + 1) % 3; // the move that beats m
+
+  // ── Elements ──────────────────────────────────────────────────────────────
+  const $ = (id: string) => document.getElementById(id)!;
+  const youMoveEl = $('you-move');
+  const aiMoveEl = $('ai-move');
+  const resultEl = $('result');
+  const scoreYouEl = $('score-you');
+  const scoreTieEl = $('score-tie');
+  const scoreAiEl = $('score-ai');
+  const roundsEl = $('rounds');
+  const predictionEl = $('prediction');
+  const winrateLabel = $('winrate-label');
+  const winrateBar = $('winrate-bar');
+  const sparkLine = $('spark-line');
+  const moveBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.move-btn'));
+
+  // ── Learning model ────────────────────────────────────────────────────────
+  // Order-2 and order-1 Markov transition counts over the human's moves, plus an
+  // overall frequency count. We predict the human's next move, then play its counter.
+  const history: number[] = [];
+  const order2: Record<string, number[]> = {}; // key "a,b" -> counts of next move
+  const order1: number[][] = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; // [prev][next]
+  const freq = [0, 0, 0];
+
+  const scores = { you: 0, ai: 0, tie: 0 };
+  const winRateHistory: number[] = [];
+
+  const argmax = (arr: number[]) => {
+    let best = 0;
+    for (let i = 1; i < arr.length; i++) if (arr[i] > arr[best]) best = i;
+    return best;
+  };
+  const sum = (arr: number[]) => arr[0] + arr[1] + arr[2];
+
+  // Returns { move, confidence } for the human's predicted next move.
+  const predict = (): { move: number; confidence: number } | null => {
+    const n = history.length;
+    if (n >= 2) {
+      const key = history[n - 2] + ',' + history[n - 1];
+      const c = order2[key];
+      if (c && sum(c) >= 2) {
+        const m = argmax(c);
+        return { move: m, confidence: c[m] / sum(c) };
+      }
+    }
+    if (n >= 1) {
+      const c = order1[history[n - 1]];
+      if (sum(c) >= 2) {
+        const m = argmax(c);
+        return { move: m, confidence: c[m] / sum(c) };
+      }
+    }
+    if (sum(freq) >= 3) {
+      const m = argmax(freq);
+      return { move: m, confidence: freq[m] / sum(freq) };
+    }
+    return null; // not enough data, so the AI plays randomly
+  };
+
+  const learn = (move: number) => {
+    const n = history.length;
+    if (n >= 2) {
+      const key = history[n - 2] + ',' + history[n - 1];
+      (order2[key] ??= [0, 0, 0])[move]++;
+    }
+    if (n >= 1) order1[history[n - 1]][move]++;
+    freq[move]++;
+    history.push(move);
+  };
+
+  const renderSpark = () => {
+    if (!winRateHistory.length) {
+      sparkLine.setAttribute('points', '');
+      return;
+    }
+    const pts = winRateHistory.slice(-40);
+    const step = pts.length > 1 ? 100 / (pts.length - 1) : 0;
+    const points = pts
+      .map((v, i) => `${(i * step).toFixed(1)},${(40 - (v / 100) * 40).toFixed(1)}`)
+      .join(' ');
+    sparkLine.setAttribute('points', points);
+  };
+
+  const updateBrain = (pred: { move: number; confidence: number } | null, wasCorrect: boolean | null) => {
+    const rounds = history.length;
+    roundsEl.textContent = `${rounds} round${rounds === 1 ? '' : 's'}`;
+
+    if (wasCorrect === null || pred === null) {
+      predictionEl.innerHTML = 'Still warming up. Play a few rounds so I can spot your patterns.';
+    } else {
+      const pct = Math.round(pred.confidence * 100);
+      const tag = wasCorrect
+        ? '<span class="font-semibold text-rose-500">Called it. ✓</span>'
+        : '<span class="font-semibold text-primary-600 dark:text-primary-400">You dodged me. ✗</span>';
+      predictionEl.innerHTML =
+        `I predicted you'd play <strong>${EMOJI[pred.move]} ${NAME[pred.move]}</strong> ` +
+        `(${pct}% sure), so I countered. ${tag}`;
+    }
+
+    const decided = scores.you + scores.ai; // ties excluded from win rate
+    const rate = decided ? Math.round((scores.ai / decided) * 100) : 0;
+    winrateLabel.textContent = decided ? `${rate}%` : 'n/a';
+    winrateBar.style.width = `${rate}%`;
+  };
+
+  // ── Round flow ────────────────────────────────────────────────────────────
+  let busy = false;
+
+  const play = (humanMove: number) => {
+    if (busy) return;
+    busy = true;
+
+    // AI decides BEFORE seeing the human's move, using only past history (fair).
+    const pred = predict();
+    const aiMove = pred ? counter(pred.move) : Math.floor(Math.random() * 3);
+
+    youMoveEl.textContent = EMOJI[humanMove];
+    aiMoveEl.textContent = EMOJI[aiMove];
+
+    // Outcome
+    let outcome: 'you' | 'ai' | 'tie';
+    if (humanMove === aiMove) outcome = 'tie';
+    else if (counter(humanMove) === aiMove) outcome = 'ai';
+    else outcome = 'you';
+
+    if (outcome === 'you') {
+      scores.you++;
+      resultEl.textContent = `You win! ${NAME[humanMove]} beats ${NAME[aiMove]}.`;
+    } else if (outcome === 'ai') {
+      scores.ai++;
+      resultEl.textContent = `AI wins. ${NAME[aiMove]} beats ${NAME[humanMove]}.`;
+    } else {
+      scores.tie++;
+      resultEl.textContent = `Tie. You both played ${NAME[humanMove]}.`;
+    }
+
+    scoreYouEl.textContent = String(scores.you);
+    scoreAiEl.textContent = String(scores.ai);
+    scoreTieEl.textContent = String(scores.tie);
+
+    const wasCorrect = pred ? pred.move === humanMove : null;
+
+    // Record the outcome for the trend line, then learn from this move.
+    const decided = scores.you + scores.ai;
+    winRateHistory.push(decided ? (scores.ai / decided) * 100 : 0);
+    renderSpark();
+
+    updateBrain(pred, wasCorrect);
+    learn(humanMove);
+
+    window.setTimeout(() => (busy = false), 180);
+  };
+
+  moveBtns.forEach((btn) => btn.addEventListener('click', () => play(Number(btn.dataset.move))));
+
+  $('reset').addEventListener('click', () => {
+    history.length = 0;
+    for (const k in order2) delete order2[k];
+    order1.forEach((r) => r.fill(0));
+    freq.fill(0);
+    winRateHistory.length = 0;
+    scores.you = scores.ai = scores.tie = 0;
+    scoreYouEl.textContent = scoreAiEl.textContent = scoreTieEl.textContent = '0';
+    youMoveEl.textContent = '🫳';
+    aiMoveEl.textContent = '🤖';
+    resultEl.textContent = 'Make your move.';
+    roundsEl.textContent = '0 rounds';
+    predictionEl.innerHTML = 'Still warming up. Play a few rounds so I can spot your patterns.';
+    winrateLabel.textContent = 'n/a';
+    winrateBar.style.width = '0%';
+    renderSpark();
+  });
+</script>

@@ -42,5 +42,6 @@ export const NAV_LINKS = [
   { href: '/projects', label: 'Projects' },
   { href: '/blog', label: 'Blog' },
   { href: '/leisure', label: 'Leisure' },
+  { href: '/play', label: 'Play' },
   { href: '/about', label: 'About' },
 ];

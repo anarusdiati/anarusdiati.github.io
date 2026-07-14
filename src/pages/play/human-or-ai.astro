@@ -1,0 +1,184 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Tag from '../../components/Tag.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Each round shows one line. Guess who wrote it. `note` explains the tell-tale
+// signs afterward, the same cues you learn to spot when labeling AI text.
+const items = [
+  { text: "ok so i tried the recipe and the first pancake was a total disaster but the rest turned out fine lol", src: 'human', note: 'Lowercase, "lol", and a specific little failure, messy personal voice reads human.' },
+  { text: "There are several important factors to consider, each with its own unique benefits and drawbacks.", src: 'ai', note: 'Vague, perfectly balanced, and commits to nothing, a classic AI hedge.' },
+  { text: "My grandmother kept buttons in an old cookie tin, and I still can't hear that rattle without picturing her kitchen.", src: 'human', note: 'A concrete sensory memory tied to a real person, the specificity is very human.' },
+  { text: "Ultimately, the key to success lies in balancing hard work, dedication, and a positive mindset.", src: 'ai', note: 'A tidy tricolon plus a motivational platitude, AI loves lists of three.' },
+  { text: "traffic was insane today, missed my exit twice because i was arguing with the gps", src: 'human', note: 'Oddly specific mishap and casual tone, no neat conclusion, human.' },
+  { text: "It's worth noting that regular exercise can improve both physical and mental well-being in meaningful ways.", src: 'ai', note: '"It\'s worth noting" and safe both-sides framing are strong AI tells.' },
+  { text: "We got lost in Lisbon for three hours and found the best custard tart of my life by accident.", src: 'human', note: 'Named place, serendipity, a story that goes somewhere unplanned, human.' },
+  { text: "In today's fast-paced world, staying organized is more important than ever for reaching your goals.", src: 'ai', note: '"In today\'s fast-paced world" is almost a signature AI opener.' },
+  { text: "the wifi at this cafe is held together with hope and duct tape i swear", src: 'human', note: 'Playful hyperbole and no punctuation, off-the-cuff human voice.' },
+  { text: "By embracing change and remaining open to new opportunities, individuals can unlock their full potential.", src: 'ai', note: 'Generic empowerment with abstract "individuals", no real person talks like this.' },
+  { text: "honestly i don't even know why i signed up for a marathon, my knees already hate me", src: 'human', note: 'Self-deprecating, specific, unresolved, human.' },
+  { text: "This dish offers a delightful blend of flavors that is sure to please a wide variety of palates.", src: 'ai', note: 'Reads like generic menu marketing, polished but empty, an AI tell.' },
+  { text: "The professor went on a 20-minute tangent about his cat and somehow it was the best part of class.", src: 'human', note: 'A weirdly specific anecdote with a wry twist, human.' },
+  { text: "While there are many perspectives on this topic, it's essential to approach it with an open mind.", src: 'ai', note: 'Both-sides hedge plus "it\'s essential", careful, non-committal AI phrasing.' },
+  { text: "i reorganized my whole bookshelf by color and now i can't find a single book but it looks amazing", src: 'human', note: 'A relatable, slightly absurd real decision, human.' },
+  { text: "Whether you're a beginner or an expert, this guide has something valuable to offer everyone.", src: 'ai', note: 'The "whether you\'re X or Y, there\'s something for everyone" formula is very AI.' },
+  { text: "my cat knocked a full glass of water onto my laptop at 3am and just stared at me. we don't talk anymore", src: 'human', note: 'Specific chaos, deadpan joke, timestamp detail, human.' },
+  { text: "Embracing a growth mindset allows us to view challenges as opportunities for learning and development.", src: 'ai', note: 'Buzzword ("growth mindset") plus abstract uplift, AI comfort zone.' },
+  { text: "went to bed early for once and then lay awake planning arguments i'll never have. classic", src: 'human', note: 'Very human overthinking, lowercase, self-aware "classic", human.' },
+  { text: "In conclusion, effective communication is the cornerstone of any successful relationship or organization.", src: 'ai', note: '"In conclusion" + "cornerstone" + sweeping claim, textbook AI summary.' },
+  { text: "the barista spelled my name 'Nunu' today and honestly i'm considering keeping it", src: 'human', note: 'Tiny true-to-life moment with a personal punchline, human.' },
+  { text: "Studies have shown that a good work-life balance can lead to increased productivity and overall happiness.", src: 'ai', note: 'Vague "studies have shown" with no source and a safe claim, AI hallmark.' },
+];
+---
+
+<BaseLayout title="Human or AI?" description="A guessing game: was this line written by a human or an AI? Learn to spot the tells.">
+  <script type="application/json" id="data" set:html={JSON.stringify(items)}></script>
+
+  <a href={`${base}/play`} class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">← Back to games</a>
+
+  <header class="mt-4 mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
+    <h1 class="text-3xl font-extrabold leading-tight sm:text-4xl">Human or AI?</h1>
+    <p class="mt-3 text-lg text-gray-500 dark:text-gray-400">
+      AI writing tends to give itself away with hedging, neat lists of three, and endless positivity.
+      Read each line and make your call. It's the same instinct you pick up from labeling model output.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-1.5">
+      <Tag label="NLP" />
+      <Tag label="Text classification" />
+    </div>
+  </header>
+
+  <div class="mx-auto max-w-lg">
+    <!-- Scoreboard -->
+    <div class="mb-6 grid grid-cols-3 gap-3 text-center">
+      <div class="rounded-xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-primary-600 dark:text-primary-400">Score</p>
+        <p id="score" class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">0<span class="text-base font-semibold text-gray-400">/0</span></p>
+      </div>
+      <div class="rounded-xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Streak</p>
+        <p id="streak" class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">0</p>
+      </div>
+      <div class="rounded-xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-rose-500 dark:text-rose-400">Best</p>
+        <p id="best" class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">0</p>
+      </div>
+    </div>
+
+    <!-- Quote card -->
+    <div class="rounded-2xl border border-gray-100 dark:border-gray-800 dark:bg-gray-900 p-6 shadow-sm">
+      <div class="flex min-h-[7rem] items-center">
+        <blockquote id="quote" class="text-lg font-medium leading-relaxed text-gray-800 dark:text-gray-100">
+          Loading…
+        </blockquote>
+      </div>
+    </div>
+
+    <!-- Guess buttons -->
+    <div class="mt-4 grid grid-cols-2 gap-3">
+      <button id="guess-human" class="guess-btn flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white py-4 text-base font-semibold text-gray-800 shadow-sm transition hover:-translate-y-0.5 hover:border-primary-300 hover:bg-primary-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800" data-guess="human">
+        <span class="text-2xl">🧑</span> Human
+      </button>
+      <button id="guess-ai" class="guess-btn flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white py-4 text-base font-semibold text-gray-800 shadow-sm transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800" data-guess="ai">
+        <span class="text-2xl">🤖</span> AI
+      </button>
+    </div>
+
+    <!-- Feedback -->
+    <div id="feedback" class="mt-4 hidden rounded-2xl border p-4 text-sm">
+      <p id="verdict" class="font-semibold"></p>
+      <p id="note" class="mt-1 text-gray-600 dark:text-gray-400"></p>
+      <button id="next" class="btn-primary mt-4">Next line →</button>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  type Item = { text: string; src: 'human' | 'ai'; note: string };
+  const raw = document.getElementById('data')!.textContent!;
+  const ITEMS: Item[] = JSON.parse(raw);
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const quoteEl = $('quote');
+  const scoreEl = $('score');
+  const streakEl = $('streak');
+  const bestEl = $('best');
+  const feedbackEl = $('feedback');
+  const verdictEl = $('verdict');
+  const noteEl = $('note');
+  const nextBtn = $('next');
+  const guessBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.guess-btn'));
+
+  let correct = 0;
+  let total = 0;
+  let streak = 0;
+  let best = 0;
+  let queue: Item[] = [];
+  let current: Item | null = null;
+  let answered = false;
+
+  const shuffle = (a: Item[]) => {
+    const arr = a.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+
+  const nextItem = () => {
+    if (queue.length === 0) queue = shuffle(ITEMS);
+    current = queue.pop()!;
+    answered = false;
+    quoteEl.textContent = `“${current.text}”`;
+    feedbackEl.classList.add('hidden');
+    guessBtns.forEach((b) => {
+      b.disabled = false;
+      b.classList.remove('ring-2', 'ring-emerald-400', 'ring-rose-400', 'opacity-50');
+    });
+  };
+
+  const guess = (choice: 'human' | 'ai') => {
+    if (answered || !current) return;
+    answered = true;
+    total++;
+    const right = choice === current.src;
+    if (right) {
+      correct++;
+      streak++;
+      best = Math.max(best, streak);
+    } else {
+      streak = 0;
+    }
+
+    scoreEl.innerHTML = `${correct}<span class="text-base font-semibold text-gray-400">/${total}</span>`;
+    streakEl.textContent = String(streak);
+    bestEl.textContent = String(best);
+
+    // Highlight the buttons: green on the true source, dim the wrong pick.
+    guessBtns.forEach((b) => {
+      b.disabled = true;
+      const g = b.dataset.guess as 'human' | 'ai';
+      if (g === current!.src) b.classList.add('ring-2', 'ring-emerald-400');
+      else b.classList.add('opacity-50');
+    });
+
+    const truth = current.src === 'human' ? '🧑 Human' : '🤖 AI';
+    feedbackEl.classList.remove('hidden', 'border-emerald-200', 'bg-emerald-50', 'border-rose-200', 'bg-rose-50', 'dark:bg-emerald-500/10', 'dark:bg-rose-500/10', 'dark:border-emerald-500/30', 'dark:border-rose-500/30');
+    if (right) {
+      feedbackEl.classList.add('border-emerald-200', 'bg-emerald-50', 'dark:border-emerald-500/30', 'dark:bg-emerald-500/10');
+      verdictEl.className = 'font-semibold text-emerald-600 dark:text-emerald-400';
+      verdictEl.textContent = `Correct, it was ${truth}.`;
+    } else {
+      feedbackEl.classList.add('border-rose-200', 'bg-rose-50', 'dark:border-rose-500/30', 'dark:bg-rose-500/10');
+      verdictEl.className = 'font-semibold text-rose-600 dark:text-rose-400';
+      verdictEl.textContent = `Not quite, it was ${truth}.`;
+    }
+    noteEl.textContent = current.note;
+  };
+
+  guessBtns.forEach((b) => b.addEventListener('click', () => guess(b.dataset.guess as 'human' | 'ai')));
+  nextBtn.addEventListener('click', nextItem);
+
+  nextItem();
+</script>
