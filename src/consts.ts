@@ -3,7 +3,7 @@ export const SITE = {
   name: 'Nana',
   brand: 'ANANA',
   fullName: 'Rokhana D. Rusdiati',
-  title: 'Rokhana D. Rusdiati — AI/ML Engineer & Data Scientist',
+  title: 'Nana',
   description:
     'AI/ML Engineer and Data Scientist specializing in NLP and human-centered AI. Founder & AI Researcher at Cognivia AI.',
   email: 'anausername@gmail.com',

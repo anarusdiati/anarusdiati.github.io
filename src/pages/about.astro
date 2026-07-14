@@ -74,7 +74,7 @@ const education = [
     degree: 'Bachelor of Computer Science',
     details: [
       'Thesis: Automatic Text Summarization for Online News Articles in Bahasa Indonesia Using Modified TextTeaser',
-      'GPA: 3.45 / 4.00',
+      'Actively involved in student activities as a volunteer and event staff, while learning and freelancing in website development.',
     ],
   },
 ];
@@ -95,28 +95,58 @@ const skills = [
 ---
 
 <BaseLayout title="About" description="About Rokhana D. Rusdiati — AI/ML Engineer and Data Scientist.">
-  <header class="mb-8">
-    <h1 class="text-gradient inline-block text-3xl font-extrabold sm:text-4xl">About</h1>
-  </header>
+  <section class="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
+    <div>
+      <header class="mb-6">
+        <h1 class="text-gradient inline-block text-3xl font-extrabold sm:text-4xl">About</h1>
+      </header>
 
-  <div class="article">
-    <p>
-      Hi, I'm <strong>{SITE.fullName}</strong> — also known as Nana. I'm an AI/ML Engineer and Data
-      Scientist with a foundation in Natural Language Processing and applied research. I
-      enjoy working at the intersection of data, technology, and human behavior — building
-      thoughtful, interpretable AI systems that support real-world decision-making.
-    </p>
-    <p>
-      I'm currently developing <strong>Cognivia</strong>, an independent AI initiative
-      focused on cognition, emotion, and human-centered intelligence.
-    </p>
-  </div>
+      <div class="article">
+        <p>
+          Hi, I'm <strong>{SITE.fullName}</strong> — also known as Nana. I work with machine
+          learning and data, with roots in natural language processing and applied research. I
+          like building thoughtful, interpretable AI systems where data, technology, and human
+          behavior come together to support real-world decisions.
+        </p>
+        <p>
+          Currently I'm sharpening my AI/ML understanding at <strong>Apple Developer Institute for AIML</strong>,
+          while developing <strong>Cognivia</strong>, an independent AI initiative focused on cognition,
+          emotion, and human-centered intelligence.
+        </p>
+      </div>
 
-  <div class="mt-6">
-    <a href={SITE.resumeUrl} target="_blank" rel="noopener" class="btn-primary">
-      Download as PDF ↗
-    </a>
-  </div>
+      <div class="mt-6">
+        <a href={SITE.resumeUrl} target="_blank" rel="noopener" class="btn-primary">
+          Download as PDF ↗
+        </a>
+      </div>
+    </div>
+
+    <!-- Memoji portrait (crossfades through a few expressions) -->
+    <div class="justify-self-center lg:justify-self-end">
+      <div
+        id="memoji-cycle"
+        class="monogram-float relative aspect-square w-36 sm:w-44 lg:w-52"
+        style="filter: drop-shadow(0 14px 24px rgba(100,112,226,0.28));"
+      >
+        <img
+          class="memoji-frame absolute inset-0 h-full w-full object-contain opacity-100 transition-opacity duration-700 ease-in-out"
+          src={`${base}/memoji-1.png`}
+          alt="Memoji portrait of Nana"
+          width="600"
+          height="600"
+        />
+        <img
+          class="memoji-frame absolute inset-0 h-full w-full object-contain opacity-0 transition-opacity duration-700 ease-in-out"
+          src={`${base}/memoji-2.png`}
+          alt=""
+          aria-hidden="true"
+          width="600"
+          height="600"
+        />
+      </div>
+    </div>
+  </section>
 
   <!-- Experience -->
   <section class="mt-12">
@@ -186,3 +216,28 @@ const skills = [
     </p>
   </section>
 </BaseLayout>
+
+<script>
+  // Crossfade the About memoji through a few expressions.
+  const cycle = document.getElementById('memoji-cycle');
+  if (cycle) {
+    const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+    const srcs = [1, 2, 3, 4].map((n) => `${base}/memoji-${n}.png`);
+    const layers = Array.from(cycle.querySelectorAll('img')) as HTMLImageElement[];
+    srcs.forEach((s) => { const i = new Image(); i.src = s; }); // preload
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (layers.length === 2 && !reduce) {
+      let front = 0; // which layer is visible
+      let idx = 0;   // which src is on the visible layer
+      setInterval(() => {
+        const next = (idx + 1) % srcs.length;
+        const back = 1 - front;
+        layers[back].src = srcs[next];
+        layers[back].style.opacity = '1';
+        layers[front].style.opacity = '0';
+        front = back;
+        idx = next;
+      }, 3200);
+    }
+  }
+</script>
