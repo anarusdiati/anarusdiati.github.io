@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+#
+# This is the Content Editor for anarusdiati.github.io. Open it at
+# https://anarusdiati.github.io/admin/ and sign in with a GitHub token
+# (see the README section "Content Editor" for the one-time setup).
+#
+# Fields here mirror the schema in src/content/config.ts — if you ever add
+# or rename a field there, update the matching collection below too.
+
+backend:
+  name: github
+  repo: anarusdiati/anarusdiati.github.io
+  branch: main
+
+# Where uploaded images are stored in the repo, and the URL prefix used to
+# reference them from Markdown (Astro serves everything in /public at the
+# site root, so /public/images/uploads/x.jpg becomes /images/uploads/x.jpg).
+media_folder: /public/images/uploads
+public_folder: /images/uploads
+
+collections:
+  - name: blog
+    label: Blog
+    label_singular: Blog post
+    folder: /src/content/blog
+    extension: md
+    format: frontmatter
+    create: true
+    slug: '{{slug}}'
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Description, name: description, widget: text, hint: 'One-sentence summary shown in the blog list.' }
+      - { label: Date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, format: 'YYYY-MM-DD' }
+      - { label: Tags, name: tags, widget: list, default: [], hint: 'e.g. AI, Personal, Tutorial' }
+      - { label: Draft, name: draft, widget: boolean, default: false, hint: 'Hide from the site until turned off.' }
+      - { label: Body, name: body, widget: markdown }
+
+  - name: projects
+    label: Projects
+    label_singular: Project
+    folder: /src/content/projects
+    extension: md
+    format: frontmatter
+    create: true
+    slug: '{{slug}}'
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Description, name: description, widget: text, hint: 'One-sentence summary shown on the Projects page.' }
+      - { label: Tags, name: tags, widget: list, default: [], hint: 'Drives the filter buttons on /projects, e.g. Machine Learning, Research.' }
+      - { label: Date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, format: 'YYYY-MM-DD', required: false }
+      - { label: 'Live / demo link', name: link, widget: string, required: false }
+      - { label: 'GitHub repo link', name: github, widget: string, required: false }
+      - { label: 'Featured on homepage', name: featured, widget: boolean, default: false }
+      - { label: Body, name: body, widget: markdown }
