@@ -40,7 +40,10 @@ export const ANALYTICS = {
 export const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/projects', label: 'Projects' },
-  { href: '/blog', label: 'Blog' },
+  // Blog is intentionally hidden from navigation for now — not deleted.
+  // The page and its posts still exist at /blog and still build; just
+  // uncomment the line below to bring it back into the menu.
+  // { href: '/blog', label: 'Blog' },
   { href: '/leisure', label: 'Leisure' },
   { href: '/play', label: 'Play' },
   { href: '/about', label: 'About' },

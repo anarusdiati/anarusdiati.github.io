@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 // Hobby categories. Add items under each category as you like.
-// "Reading" has sample entries to show how it looks.
 type HobbyItem = {
   title: string;
   meta?: string; // e.g. author, medium, tool
@@ -11,33 +10,57 @@ type HobbyItem = {
 };
 
 const categories: { name: string; emoji: string; items: HobbyItem[] }[] = [
-  {
-    name: 'Reading',
-    emoji: '📚',
-    items: [
-      {
-        title: 'Thinking, Fast and Slow',
-        meta: 'Daniel Kahneman',
-        note: 'On the two systems that drive the way we think.',
-        status: 'Reading',
-      },
-      {
-        title: 'Atomic Habits',
-        meta: 'James Clear',
-        note: 'Small habits, remarkable results.',
-        status: 'Finished',
-      },
-      {
-        title: 'The Alignment Problem',
-        meta: 'Brian Christian',
-        note: 'Where machine learning meets human values.',
-        status: 'To read',
-      },
-    ],
-  },
+  { name: 'Reading', emoji: '📚', items: [] }, // Reading now uses the `books` array below instead.
   { name: 'Art', emoji: '🎨', items: [] },
   { name: 'Journaling', emoji: '📓', items: [] },
-  { name: 'Paper Reading', emoji: '📄', items: [] },
+  // Paper Reading is intentionally hidden for now — not deleted. Uncomment
+  // the line below to bring its filter chip and section back.
+  // { name: 'Paper Reading', emoji: '📄', items: [] },
+];
+
+// Reading list — one card per book. `rating` is 0–5 and supports halves
+// (e.g. 4.5). `cover` can be any image URL; Open Library's free cover API
+// works well if you don't have your own photo: replace {ISBN13} below.
+type Book = {
+  title: string;
+  author: string;
+  category: string; // e.g. Non Fiction, Fiction, Self-Help
+  cover: string;
+  rating: number;
+  review: string;
+  shopeeUrl?: string;
+};
+const books: Book[] = [
+  {
+    title: 'Atomic Habits',
+    author: 'James Clear',
+    category: 'Non Fiction',
+    cover: 'https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg',
+    rating: 4.5,
+    review:
+      "In Atomic Habits, James Clear brilliantly proves that major life transformations don't require drastic leaps, but rather tiny 1% daily improvements that compound over time through a focus on systems over goals and a shift in identity. Guided by the 4 Laws of Behavior Change (Make it obvious, attractive, easy, and satisfying), Clear delivers an extraordinarily practical, direct, and actionable framework, making it an essential read for anyone looking to break bad habits and build lasting positive routines effortlessly.",
+    shopeeUrl: 'https://s.shopee.co.id/3B6mu0GDSO',
+  },
+  {
+    title: 'The Midnight Library',
+    author: 'Matt Haig',
+    category: 'Fiction',
+    cover: 'https://covers.openlibrary.org/b/isbn/9780525559474-L.jpg',
+    rating: 4.3,
+    review:
+      "This novel dives into life's regrets and choices through Nora, a woman who discovers a magical library containing every alternate version of her life. Haig's light yet reflective writing gently reminds us that a perfect life does not exist. True meaning is not found in making the \"right\" choice, but in how we embrace the choices we actually make. It is a comforting story that gives a gentle wake-up call to anyone who often gets stuck in \"what ifs.\"",
+    shopeeUrl: 'https://s.shopee.co.id/3VjetsSv0z',
+  },
+  {
+    title: 'The Courage to Be Disliked',
+    author: 'Ichiro Kishimi & Fumitake Koga',
+    category: 'Self-Help',
+    cover: 'https://covers.openlibrary.org/b/isbn/9781501197277-L.jpg',
+    rating: 4.7,
+    review:
+      "Written as a dialogue between a philosopher and a skeptical young man, this book breaks down Alfred Adler's psychology into an easy and engaging read. The main idea is that true freedom comes when you stop chasing external validation and have the courage to accept that not everyone will like you. While some of its points feel a bit absolute, it serves as a great introduction to the idea of \"separation of tasks\" and taking full responsibility for your own life.",
+    shopeeUrl: 'https://s.shopee.co.id/9AO1eQKkbJ',
+  },
 ];
 
 // Art gallery (placeholder images from Unsplash) — each piece lists the tools
@@ -53,6 +76,24 @@ const artPieces: ArtPiece[] = [
   { title: 'Sailing at dusk', tools: ['Acrylic', 'Canvas'], id: 'photo-1582561424760-0321d75e81fa', alt: 'Painting of a sail ship on the sea' },
   { title: 'Sheep on the road', tools: ['Gouache', 'Sketchbook'], id: 'photo-1578301978693-85fa9c0320b9', alt: 'Painting of a herd of sheep on a road' },
   { title: 'Quiet waters', tools: ['Oil on canvas', 'Fan brush'], id: 'photo-1688588426729-dc4f7bdb8fbe', alt: 'Painting of a body of water surrounded by trees' },
+];
+
+// Journaling prompts — curated prompts to unwind your day. Add more entries
+// any time; they render as a simple 3-column card grid.
+type JournalPrompt = { title: string; prompt: string };
+const journalPrompts: JournalPrompt[] = [
+  {
+    title: "Today's Highlight",
+    prompt: "What's one moment from today you'd want to remember? What made it meaningful?",
+  },
+  {
+    title: 'Untangle',
+    prompt: 'What thought keeps looping in your head right now? Write it down until it stops feeling so loud.',
+  },
+  {
+    title: 'Tomorrow, Gently',
+    prompt: "If tomorrow could go well in just one way, what would that be? What's one small thing you can do to help it happen?",
+  },
 ];
 ---
 
@@ -85,7 +126,13 @@ const artPieces: ArtPiece[] = [
   <!-- Sections (one per category). "All" shows every non-empty category. -->
   {categories.map((cat) => {
     const isArt = cat.name === 'Art';
-    const hasContent = cat.items.length > 0 || (isArt && artPieces.length > 0);
+    const isReading = cat.name === 'Reading';
+    const isJournaling = cat.name === 'Journaling';
+    const hasContent =
+      cat.items.length > 0 ||
+      (isArt && artPieces.length > 0) ||
+      (isReading && books.length > 0) ||
+      (isJournaling && journalPrompts.length > 0);
     return (
     <section
       class={`hobby-section mb-10 ${hasContent ? '' : 'hidden'}`}
@@ -95,7 +142,74 @@ const artPieces: ArtPiece[] = [
       <h2 class="hobby-heading mb-4 text-lg font-bold text-gray-900 dark:text-gray-100">
         <span class="mr-1">{cat.emoji}</span>{cat.name}
       </h2>
-      {isArt ? (
+      {isJournaling && (
+        <p class="-mt-2 mb-4 text-sm text-gray-500 dark:text-gray-400">
+          Curated journaling prompts to unwind your day.
+        </p>
+      )}
+      {isJournaling ? (
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {journalPrompts.map((p) => (
+            <div class="rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-primary-200 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-700">
+              <h3 class="text-base font-bold text-gray-900 dark:text-gray-100">{p.title}</h3>
+              <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-400">{p.prompt}</p>
+            </div>
+          ))}
+        </div>
+      ) : isReading ? (
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {books.map((book) => (
+            <button
+              type="button"
+              class="reading-item group flex gap-4 rounded-xl border border-gray-100 p-4 text-left shadow-sm transition hover:border-primary-200 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-700"
+              data-title={book.title}
+              data-author={book.author}
+              data-category={book.category}
+              data-cover={book.cover}
+              data-rating={book.rating}
+              data-review={book.review}
+              data-buy={book.shopeeUrl || ''}
+            >
+              <img
+                src={book.cover}
+                alt={`Cover of ${book.title}`}
+                loading="lazy"
+                class="h-32 w-20 shrink-0 rounded-md object-cover shadow-sm"
+              />
+              <div class="flex min-w-0 flex-col">
+                <h3 class="text-base font-bold leading-snug text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400">
+                  {book.title}
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{book.author}</p>
+
+                <!-- Star rating (supports halves, e.g. 4.5) -->
+                <div class="mt-2 flex items-center gap-1" aria-label={`Rating: ${book.rating} out of 5`}>
+                  {Array.from({ length: 5 }).map((_, i) => {
+                    const fill = Math.max(0, Math.min(1, book.rating - i)) * 100;
+                    return (
+                      <span class="relative inline-block h-4 w-4">
+                        <svg viewBox="0 0 20 20" class="absolute inset-0 h-4 w-4 text-gray-200 dark:text-gray-700" fill="currentColor">
+                          <path d="M10 1.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L10 14.8l-5.2 2.7 1-5.8L1.6 7.6l5.8-.8L10 1.5z" />
+                        </svg>
+                        <span class="absolute inset-0 overflow-hidden" style={`width:${fill}%`}>
+                          <svg viewBox="0 0 20 20" class="h-4 w-4 text-primary-500 dark:text-primary-400" fill="currentColor">
+                            <path d="M10 1.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L10 14.8l-5.2 2.7 1-5.8L1.6 7.6l5.8-.8L10 1.5z" />
+                          </svg>
+                        </span>
+                      </span>
+                    );
+                  })}
+                  <span class="ml-1 text-xs font-medium text-gray-500 dark:text-gray-400">{book.rating.toFixed(1)}</span>
+                </div>
+
+                <span class="mt-2 inline-block w-fit rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-500/15 dark:text-primary-300">
+                  {book.category}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : isArt ? (
         <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {artPieces.map((p) => (
             <button
@@ -176,6 +290,55 @@ const artPieces: ArtPiece[] = [
     </button>
     <img id="art-lightbox-img" src="" alt="" class="max-h-[90vh] max-w-[92vw] rounded-lg object-contain shadow-2xl" />
   </div>
+
+  <!-- Popup for a Reading entry's full review -->
+  <div
+    id="book-modal"
+    class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Book details"
+  >
+    <div class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900">
+      <button
+        id="book-modal-close"
+        class="absolute right-4 top-4 rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+        aria-label="Close"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <div class="flex gap-4 pr-8">
+        <img id="book-modal-cover" src="" alt="" class="h-40 w-28 shrink-0 rounded-md object-cover shadow-sm" />
+        <div class="min-w-0">
+          <h3 id="book-modal-title" class="text-xl font-bold leading-snug text-gray-900 dark:text-gray-100"></h3>
+          <p id="book-modal-author" class="mt-1 text-base text-gray-500 dark:text-gray-400"></p>
+          <span
+            id="book-modal-category"
+            class="mt-2 inline-block w-fit rounded-full bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
+          ></span>
+          <div id="book-modal-stars" class="mt-3 flex items-center gap-1.5"></div>
+        </div>
+      </div>
+
+      <p class="mt-5 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+        My review at a glance
+      </p>
+      <p id="book-modal-review" class="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-400"></p>
+
+      <a
+        id="book-modal-buy"
+        href="#"
+        target="_blank"
+        rel="noopener"
+        class="btn-primary mt-5 hidden self-start px-4 py-2 text-sm"
+      >
+        Get yours here ↗
+      </a>
+    </div>
+  </div>
 </BaseLayout>
 
 <script>
@@ -248,7 +411,84 @@ const artPieces: ArtPiece[] = [
   lb?.addEventListener('click', (e) => {
     if (e.target === lb) closeLightbox();
   });
+
+  // ── Reading popup (click a book to see the full review) ────────────────────
+  const bookModal = document.getElementById('book-modal');
+  const bmCover = document.getElementById('book-modal-cover') as HTMLImageElement | null;
+  const bmTitle = document.getElementById('book-modal-title');
+  const bmAuthor = document.getElementById('book-modal-author');
+  const bmCategory = document.getElementById('book-modal-category');
+  const bmStars = document.getElementById('book-modal-stars');
+  const bmReview = document.getElementById('book-modal-review');
+  const bmBuy = document.getElementById('book-modal-buy') as HTMLAnchorElement | null;
+  const bmClose = document.getElementById('book-modal-close');
+
+  // Builds the same two-layer star markup used in the card preview, so a
+  // rating like 4.5 renders 4 full stars + 1 half-filled star. `large` bumps
+  // the icon and label size up for the popup, where it should read bigger.
+  const starPath =
+    'M10 1.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L10 14.8l-5.2 2.7 1-5.8L1.6 7.6l5.8-.8L10 1.5z';
+  function starsHtml(rating: number, large = false) {
+    const box = large ? 'h-5 w-5' : 'h-4 w-4';
+    const label = large ? 'text-sm' : 'text-xs';
+    let html = '';
+    for (let i = 0; i < 5; i++) {
+      const fill = Math.max(0, Math.min(1, rating - i)) * 100;
+      html +=
+        `<span class="relative inline-block ${box}">` +
+        `<svg viewBox="0 0 20 20" class="absolute inset-0 ${box} text-gray-200 dark:text-gray-700" fill="currentColor"><path d="${starPath}" /></svg>` +
+        `<span class="absolute inset-0 overflow-hidden" style="width:${fill}%">` +
+        `<svg viewBox="0 0 20 20" class="${box} text-primary-500 dark:text-primary-400" fill="currentColor"><path d="${starPath}" /></svg>` +
+        `</span></span>`;
+    }
+    html += `<span class="ml-1 ${label} font-medium text-gray-500 dark:text-gray-400">${rating.toFixed(1)}</span>`;
+    return html;
+  }
+
+  const openBookModal = (btn: HTMLElement) => {
+    if (!bookModal || !bmCover || !bmTitle || !bmAuthor || !bmCategory || !bmStars || !bmReview) return;
+    const title = btn.dataset.title || '';
+    bmCover.src = btn.dataset.cover || '';
+    bmCover.alt = `Cover of ${title}`;
+    bmTitle.textContent = title;
+    bmAuthor.textContent = btn.dataset.author || '';
+    bmCategory.textContent = btn.dataset.category || '';
+    bmStars.innerHTML = starsHtml(parseFloat(btn.dataset.rating || '0'), true);
+    bmReview.textContent = btn.dataset.review || '';
+
+    const buy = btn.dataset.buy;
+    if (bmBuy) {
+      if (buy) {
+        bmBuy.href = buy;
+        bmBuy.classList.remove('hidden');
+      } else {
+        bmBuy.classList.add('hidden');
+      }
+    }
+
+    bookModal.classList.remove('hidden');
+    bookModal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  };
+  const closeBookModal = () => {
+    if (!bookModal) return;
+    bookModal.classList.add('hidden');
+    bookModal.classList.remove('flex');
+    document.body.style.overflow = '';
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('.reading-item').forEach((btn) => {
+    btn.addEventListener('click', () => openBookModal(btn));
+  });
+  bmClose?.addEventListener('click', closeBookModal);
+  bookModal?.addEventListener('click', (e) => {
+    if (e.target === bookModal) closeBookModal();
+  });
+
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'Escape') {
+      closeLightbox();
+      closeBookModal();
+    }
   });
 </script>

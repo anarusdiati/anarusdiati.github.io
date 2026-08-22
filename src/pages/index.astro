@@ -1,16 +1,17 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import BlogCard from '../components/BlogCard.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import HeroOrbit from '../components/HeroOrbit.astro';
 import { SITE } from '../consts';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 2);
+// Blog section is hidden site-wide for now (see src/consts.ts) — the query
+// and "Latest posts" block below are commented out to match, not deleted.
+// const posts = (await getCollection('blog', ({ data }) => !data.draft))
+//   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+//   .slice(0, 2);
 
 const featured = (await getCollection('projects'))
   .filter((p) => p.data.featured)
@@ -56,24 +57,29 @@ const featured = (await getCollection('projects'))
     </section>
   )}
 
-  <!-- Latest posts -->
-  {posts.length > 0 && (
-    <section class="mt-14">
-      <div class="mb-5 flex items-baseline justify-between">
-        <h2 class="text-2xl font-bold">Latest posts</h2>
-        <a href={`${base}/blog/`} class="link-grad text-sm text-primary-600 dark:text-primary-400">See all →</a>
-      </div>
-      <div class="grid gap-4">
-        {posts.map((post) => (
-          <BlogCard
-            title={post.data.title}
-            description={post.data.description}
-            date={post.data.date}
-            tags={post.data.tags}
-            url={`${base}/blog/${post.slug}/`}
-          />
-        ))}
-      </div>
-    </section>
-  )}
+  <!--
+    Latest posts — hidden along with the Blog nav link (see src/consts.ts).
+    Uncomment this along with the `posts` query above and the BlogCard
+    import to bring the Blog section back.
+
+    {posts.length > 0 && (
+      <section class="mt-14">
+        <div class="mb-5 flex items-baseline justify-between">
+          <h2 class="text-2xl font-bold">Latest posts</h2>
+          <a href={`${base}/blog/`} class="link-grad text-sm text-primary-600 dark:text-primary-400">See all →</a>
+        </div>
+        <div class="grid gap-4">
+          {posts.map((post) => (
+            <BlogCard
+              title={post.data.title}
+              description={post.data.description}
+              date={post.data.date}
+              tags={post.data.tags}
+              url={`${base}/blog/${post.slug}/`}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+  -->
 </BaseLayout>
