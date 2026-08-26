@@ -123,19 +123,19 @@
   box-shadow: 0 6px 18px -6px rgba(100, 112, 226, 0.55);
 }
 
-/* Outline button with a soft periwinkle gradient wash that slides in on hover. */
+/* "Source code" button — now matches .btn-primary's periwinkle gradient
+   fill + white text (previously a light outline style) so the two CTAs on
+   a project page read as the same family of action. */
 .btn-outline {
-  @apply inline-flex items-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition dark:border-gray-700 dark:text-gray-300;
-  background-image: linear-gradient(110deg, #eff1fe, #e1e4fd);
-  background-size: 220% 100%;
-  background-position: 220% 0;
+  @apply inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-white;
+  background-image: linear-gradient(110deg, #6470e2 0%, #505bc4 45%, #7c86ef 100%);
+  background-size: 200% 100%;
+  background-position: 0% 0;
+  transition: background-position 0.55s ease, box-shadow 0.3s ease;
 }
 .btn-outline:hover {
-  background-position: 0% 0;
-  @apply border-primary-200 text-primary-700 dark:border-primary-700 dark:text-primary-200;
-}
-.dark .btn-outline {
-  background-image: linear-gradient(110deg, rgba(150, 161, 246, 0.22), rgba(124, 134, 239, 0.14));
+  background-position: 100% 0;
+  box-shadow: 0 6px 18px -6px rgba(100, 112, 226, 0.55);
 }
 
 /* Card glow: a faint periwinkle gradient wash + soft shadow on hover. */
