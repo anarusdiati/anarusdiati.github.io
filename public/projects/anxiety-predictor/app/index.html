@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AnxietyPredictor — estimate your anxiety level</title>
+<meta name="description" content="A free, private, in-browser anxiety level estimator. Runs entirely on your device — nothing is uploaded.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><circle cx=%2212%22 cy=%2212%22 r=%2211%22 fill=%22%23847ac1%22/><path d=%22M6 13c2-4 4-6 6-6s4 2 6 6%22 stroke=%22white%22 stroke-width=%221.6%22 fill=%22none%22 stroke-linecap=%22round%22/></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-name">AnxietyPredictor</span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button type="button" class="tab-btn active" data-tab="assess" role="tab" aria-selected="true">Assess</button>
+      <button type="button" class="tab-btn" data-tab="history" role="tab" aria-selected="false">History</button>
+      <button type="button" class="tab-btn" data-tab="about" role="tab" aria-selected="false">About</button>
+    </nav>
+  </header>
+
+  <main class="content">
+
+    <!-- ============ ASSESS ============ -->
+    <section id="tab-assess" class="tab-panel active">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Tell us about your last 24 hours</h1>
+          <p class="lock-note">🔒 All values stay in your browser. No accounts, no upload.</p>
+        </div>
+        <button type="button" class="icon-btn" id="reset-btn" title="Reset form" aria-label="Reset form">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 1 2.6 5.9"/><path d="M4 17v-5h5"/></svg>
+        </button>
+      </div>
+
+      <p id="model-status" class="model-status" hidden>Loading prediction model…</p>
+
+      <form id="assessment-form-wrap">
+        <div id="assessment-form"><!-- rendered by app.js --></div>
+        <div class="predict-bar">
+          <button type="submit" id="predict-btn" class="predict-btn" disabled>
+            <span>Predict Anxiety Level</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ============ RESULT (pushed sub-page) ============ -->
+    <section id="tab-result" class="tab-panel"><!-- rendered by app.js --></section>
+
+    <!-- ============ HISTORY ============ -->
+    <section id="tab-history" class="tab-panel">
+      <div class="page-header">
+        <h1 class="page-title">History</h1>
+        <button type="button" class="icon-btn danger" id="clear-history" title="Delete all" aria-label="Delete all" hidden>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/></svg>
+        </button>
+      </div>
+      <div id="history-list"></div>
+      <div id="history-empty" class="empty-state" hidden>
+        <div class="empty-icon">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+        </div>
+        <p class="empty-title">No assessments yet</p>
+        <p class="empty-sub">Run your first prediction from the Assess tab — your past results will appear here.</p>
+      </div>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section id="tab-about" class="tab-panel">
+      <div class="page-header"><h1 class="page-title">About</h1></div>
+
+      <section class="card">
+        <h2 class="card-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 8v.1"/></svg><span>What this site does</span></h2>
+        <p class="body-text">AnxietyPredictor estimates an anxiety score (1–10) from 16 daily and physiological inputs using an XGBoost model — the same model as the iOS app, running entirely in your browser via ONNX Runtime Web. It also explains the top contributing factors and offers contextual suggestions.</p>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg><span>Privacy</span></h2>
+        <p class="body-text">Your inputs and results never leave this device — there's no server, no account, and no network request carrying your data. Prediction runs locally in your browser. Past assessments are stored only in this browser's local storage and are removed if you clear your browser data.</p>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1.5 5.6A3.2 3.2 0 0 0 7 18a3 3 0 0 0 5-2.2V6.5A2.5 2.5 0 0 0 9.5 4H9Z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 1.5 5.6A3.2 3.2 0 0 1 17 18a3 3 0 0 1-5-2.2V6.5A2.5 2.5 0 0 1 14.5 4h.5Z"/></svg><span>Model</span></h2>
+        <p class="body-text">Trained with XGBoost on the enhanced anxiety dataset (11,000 rows). Optuna-tuned hyperparameters: 496 trees, max depth 5, learning rate ≈ 0.0106. The same 16 named inputs the iOS app sends are used here, exported to ONNX instead of CoreML.</p>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M4 20h16"/></svg><span>How accurate is it?</span></h2>
+        <div class="stat-pills">
+          <div class="stat-pill"><span class="stat-value">77%</span><span class="stat-label">of score variation explained (R²)</span></div>
+          <div class="stat-pill"><span class="stat-value">≈1 pt</span><span class="stat-label">typical margin of error, out of 10</span></div>
+        </div>
+        <p class="body-text">In plain terms: if your true score should be a 6, the model usually lands somewhere around 5–7. That's not the model being sloppy — roughly the remaining 23% comes from things these 16 numbers can't see, like your personality, life circumstances, or how you're feeling in ways a form can't fully capture. Treat the result as a reasonably informed estimate, not an exact reading.</p>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 2 20h20L12 4Z"/><path d="M12 10.5v4.2M12 17.3v.1"/></svg><span>Disclaimer</span></h2>
+        <p class="body-text">This is informational software. It is not a diagnostic tool and is not a substitute for professional mental-health care. If you are struggling, please reach out to a qualified clinician.</p>
+      </section>
+
+      <p class="footer-note">Web port of the AnxietyPredictor iOS app · model runs 100% client-side</p>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="vendor/ort/ort.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

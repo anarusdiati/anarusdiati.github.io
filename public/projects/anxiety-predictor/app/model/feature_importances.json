@@ -1,0 +1,42 @@
+{
+  "feature_order": [
+    "Age",
+    "Sleep Hours",
+    "Caffeine Intake",
+    "Smoking",
+    "Family History of Anxiety",
+    "Stress Level",
+    "Heart Rate",
+    "Breathing Rate",
+    "Sweating Level",
+    "Dizziness",
+    "Medication",
+    "Recent Major Life Event",
+    "Diet Quality",
+    "Therapy Category",
+    "Physical Activity",
+    "Alcohol Consumption"
+  ],
+  "importance": {
+    "Age": 0.01,
+    "Sleep Hours": 0.1528,
+    "Caffeine Intake": 0.0254,
+    "Smoking": 0.007,
+    "Family History of Anxiety": 0.0155,
+    "Stress Level": 0.5432,
+    "Heart Rate": 0.0104,
+    "Breathing Rate": 0.0108,
+    "Sweating Level": 0.0174,
+    "Dizziness": 0.0056,
+    "Medication": 0.0069,
+    "Recent Major Life Event": 0.0075,
+    "Diet Quality": 0.0425,
+    "Therapy Category": 0.1218,
+    "Physical Activity": 0.0151,
+    "Alcohol Consumption": 0.0081
+  },
+  "metrics": {
+    "rmse": 1.003783185199725,
+    "r2": 0.7825527428814756
+  }
+}

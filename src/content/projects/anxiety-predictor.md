@@ -3,6 +3,7 @@ title: "Anxiety Predictor"
 description: "An iOS app that estimates anxiety levels based on lifestyle factors using an XGBoost model converted to CoreML, running 100% on-device."
 tags: ["Machine Learning", "iOS", "SwiftUI", "CoreML", "XGBoost", "Human-Centered AI"]
 date: 2026-04-01
+link: "https://anarusdiati.github.io/projects/anxiety-predictor/app/"
 github: "https://github.com/anarusdiati/AnxietyPredictor-iOS"
 featured: true
 ---
