@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cognivia Calm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;1,300;1,400&family=Manrope:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #221a38;
+    --ink-deep: #140f24;
+    --lavender: #b9a6e0;
+    --petal: #f0b8ce;
+    --powder: #a9c9ee;
+    --mist: #e7dcf2;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: var(--ink-deep);
+    font-family: 'Manrope', system-ui, sans-serif;
+  }
+
+  .scene {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: radial-gradient(120% 90% at 18% 20%, var(--lavender) 0%, transparent 55%),
+                radial-gradient(110% 90% at 82% 78%, var(--powder) 0%, transparent 55%),
+                radial-gradient(90% 80% at 70% 15%, var(--petal) 0%, transparent 50%),
+                var(--ink);
+    animation: sceneBreathe 14s ease-in-out infinite;
+  }
+
+  @keyframes sceneBreathe {
+    0%   { filter: brightness(0.94) saturate(0.96); }
+    28.6% { filter: brightness(1.05) saturate(1.05); }
+    57.1% { filter: brightness(1.05) saturate(1.05); }
+    100% { filter: brightness(0.94) saturate(0.96); }
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    mix-blend-mode: screen;
+    opacity: 0.55;
+    will-change: transform;
+  }
+  .blob-a {
+    width: 70vmax; height: 70vmax;
+    left: -20vmax; top: -15vmax;
+    background: radial-gradient(circle, var(--lavender), transparent 70%);
+    animation: driftA 46s ease-in-out infinite alternate;
+  }
+  .blob-b {
+    width: 65vmax; height: 65vmax;
+    right: -18vmax; bottom: -20vmax;
+    background: radial-gradient(circle, var(--powder), transparent 70%);
+    animation: driftB 54s ease-in-out infinite alternate;
+  }
+  .blob-c {
+    width: 55vmax; height: 55vmax;
+    right: 5vmax; top: -18vmax;
+    background: radial-gradient(circle, var(--petal), transparent 70%);
+    animation: driftC 40s ease-in-out infinite alternate;
+  }
+  .blob-d {
+    width: 50vmax; height: 50vmax;
+    left: 8vmax; bottom: -15vmax;
+    background: radial-gradient(circle, var(--mist), transparent 70%);
+    opacity: 0.35;
+    animation: driftD 60s ease-in-out infinite alternate;
+  }
+
+  @keyframes driftA { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(8vmax, 6vmax) scale(1.12); } }
+  @keyframes driftB { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(-7vmax,-9vmax) scale(1.15); } }
+  @keyframes driftC { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(-6vmax, 8vmax) scale(0.9); } }
+  @keyframes driftD { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(6vmax,-5vmax) scale(1.08); } }
+
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 55%, transparent 35%, var(--ink-deep) 115%);
+    opacity: 0.75;
+    pointer-events: none;
+  }
+
+  .particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .particle {
+    position: absolute;
+    bottom: -5vh;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--mist), rgba(231,220,242,0));
+    box-shadow: 0 0 14px 2px rgba(231,220,242,0.35);
+    animation-name: rise;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+
+  @keyframes rise {
+    0%   { transform: translate(0, 0) translateX(0); opacity: 0; }
+    8%   { opacity: 0.7; }
+    50%  { transform: translate(var(--sway, 2vw), -55vh); }
+    92%  { opacity: 0.5; }
+    100% { transform: translate(calc(var(--sway, 2vw) * -1), -115vh); opacity: 0; }
+  }
+
+  .center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(20px, 4vh, 36px);
+    text-align: center;
+  }
+
+  .ring-wrap {
+    position: relative;
+    width: clamp(140px, 22vw, 220px);
+    height: clamp(140px, 22vw, 220px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeIn 3s ease-out 1.2s forwards;
+  }
+  .ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(231,220,242,0.55);
+    box-shadow: 0 0 40px rgba(185,166,224,0.35), inset 0 0 30px rgba(231,220,242,0.12);
+    animation: breatheRing 14s ease-in-out infinite;
+  }
+  .ring::after {
+    content: "";
+    position: absolute;
+    inset: 22%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(231,220,242,0.5), transparent 70%);
+    filter: blur(6px);
+  }
+
+  @keyframes breatheRing {
+    0%     { transform: scale(0.72); opacity: 0.55; }
+    28.6%  { transform: scale(1);    opacity: 0.95; }
+    57.1%  { transform: scale(1);    opacity: 0.95; }
+    100%   { transform: scale(0.72); opacity: 0.55; }
+  }
+
+  .breath-text {
+    font-weight: 300;
+    font-size: clamp(14px, 1.6vw, 17px);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--mist);
+    opacity: 0.85;
+    min-height: 1.4em;
+    transition: opacity 0.6s ease;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scene, .blob, .particle { animation-duration: 90s !important; }
+    .ring { animation-duration: 24s; }
+    .ring-wrap { animation: none; opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <div class="scene">
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+    <div class="blob blob-c"></div>
+    <div class="blob blob-d"></div>
+    <div class="vignette"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="center">
+      <div class="ring-wrap">
+        <div class="ring"></div>
+      </div>
+      <div class="breath-text" id="breathText">Breathe in</div>
+    </div>
+  </div>
+
+<script>
+  // Layered floating particles — three soft depth bands
+  const field = document.getElementById('particles');
+  const LAYERS = [
+    { count: 10, size: [3, 5],  blur: 0,   opacity: [0.25, 0.4], dur: [26, 38] }, // far
+    { count: 9,  size: [5, 8],  blur: 1,   opacity: [0.35, 0.55], dur: [20, 30] }, // mid
+    { count: 7,  size: [7, 12], blur: 0,   opacity: [0.5, 0.75], dur: [16, 24] }  // near
+  ];
+
+  LAYERS.forEach(layer => {
+    for (let i = 0; i < layer.count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = rand(layer.size[0], layer.size[1]);
+      const dur = rand(layer.dur[0], layer.dur[1]);
+      const delay = -rand(0, dur);
+      const sway = (rand(-6, 6)).toFixed(1) + 'vw';
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = rand(0, 100) + 'vw';
+      p.style.opacity = rand(layer.opacity[0] * 100, layer.opacity[1] * 100) / 100;
+      p.style.filter = layer.blur ? `blur(${layer.blur}px)` : 'none';
+      p.style.setProperty('--sway', sway);
+      p.style.animationDuration = dur + 's';
+      p.style.animationDelay = delay + 's';
+      field.appendChild(p);
+    }
+  });
+
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+
+  // Breathing cue text, synced to the 14s ring cycle (4s in / 4s hold / 6s out)
+  const breathText = document.getElementById('breathText');
+  const phases = [
+    { label: 'Breathe in',        dur: 4000 },
+    { label: 'Hold',              dur: 4000 },
+    { label: 'Breathe out slowly', dur: 6000 }
+  ];
+  let i = 0;
+  function nextPhase() {
+    breathText.style.opacity = 0;
+    setTimeout(() => {
+      breathText.textContent = phases[i].label;
+      breathText.style.opacity = 0.85;
+    }, 300);
+    setTimeout(() => {
+      i = (i + 1) % phases.length;
+      nextPhase();
+    }, phases[i].dur);
+  }
+  nextPhase();
+</script>
+</body>
+</html>
