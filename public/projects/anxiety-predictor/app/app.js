@@ -756,11 +756,13 @@
       <h1 class="page-title">Your result</h1>
 
       <section class="card center-card">
-        ${gaugeSVG(result.score, result.category)}
-        <div class="gauge-label">
-          <span class="gauge-score" style="color:var(${catMeta.cssVar})">${fmtScore(result.score)}</span>
-          <span class="gauge-of10">of 10</span>
-          <span class="gauge-cat" style="color:var(${catMeta.cssVar});background:color-mix(in srgb, var(${catMeta.cssVar}) 15%, transparent)">${catMeta.label.toUpperCase()}</span>
+        <div class="gauge-wrap">
+          ${gaugeSVG(result.score, result.category)}
+          <div class="gauge-label">
+            <span class="gauge-score" style="color:var(${catMeta.cssVar})">${fmtScore(result.score)}</span>
+            <span class="gauge-of10">of 10</span>
+            <span class="gauge-cat" style="color:var(${catMeta.cssVar});background:color-mix(in srgb, var(${catMeta.cssVar}) 15%, transparent)">${catMeta.label.toUpperCase()}</span>
+          </div>
         </div>
         <p class="cat-headline" style="color:var(${catMeta.cssVar})">${catMeta.headline}</p>
         <p class="muted small">Assessed ${fmtDate(result.generatedAt)}</p>
