@@ -39,14 +39,24 @@ const formatted = project.data.date
     </div>
   </header>
 
-  <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_220px] lg:gap-14">
-    <article class="article reveal-children">
+  {/* `relative` anchors the ToC so it can pop out to the right of this
+      exact column, without changing the article's own width — the article
+      stays exactly as wide as the title/description above it. */}
+  <div class="relative">
+    {/* max-w-none overrides the shared `.article` reading-width cap just for
+        this page: now that the ToC lives outside this column entirely (see
+        the aside below), the article can fill the whole section instead of
+        leaving empty space where the ToC used to sit. */}
+    <article class="article reveal-children max-w-none">
       <Content />
     </article>
 
     {toc.length > 0 && (
-      <aside class="hidden lg:block">
-        <div class="sticky top-20">
+      // Only shown once the viewport actually has free margin outside the
+      // article to hold it (see the 2xl breakpoint) — it never borrows
+      // space from the article column itself.
+      <aside class="pointer-events-none absolute inset-y-0 left-full hidden w-56 pl-10 2xl:block">
+        <div class="pointer-events-auto sticky top-20">
           <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Table of Contents</p>
           <nav class="space-y-1 border-l border-gray-100 dark:border-gray-800 text-sm">
             {toc.map((h) => (
