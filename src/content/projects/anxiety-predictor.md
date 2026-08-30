@@ -22,11 +22,11 @@ Anxiety is a **feeling** of worry and tension with physical signs like a faste
 
 One design principle I held onto from the start: because the topic is as sensitive as mental health, the app had to run 100% on-device. No API calls, no user data ever leaves the phone.
 
-## Objective
+### Objective
 
 Build a prediction system that: (1) is accurate enough to be educationally useful, (2) is lightweight enough to run in real time on an iPhone without a server, (3) can explain the reasoning behind each prediction instead of just returning a number, and (4) preserves full privacy, meaning zero data ever leaves the device.
 
-## Approach at a Glance
+### Approach at a Glance
 
 - Collected and cleaned a simulated dataset of 11,001 rows containing 19 physiological and behavioral variables (age, sleep, stress, caffeine, alcohol, smoking, family history, heart rate, etc.)
 - Wrote a preprocessing pipeline (`preprocess()`) that reduces the 19 raw columns into a canonical 16 feature contract, including bucketing therapy sessions into 4 ordinal categories, converting weekly units to daily, and strict validation on Yes/No columns
@@ -41,7 +41,7 @@ Build a prediction system that: (1) is accurate enough to be educationally usefu
 
 The dataset ([Kaggle](https://www.kaggle.com/datasets/natezhang123/social-anxiety-dataset)) used has \~11.000 samples of people with different levels of social anxiety from mild to severe. The data comes from real surveys and observations and has been cleaned for analysis but it is only for research and education, and **not for diagnosis or treatment.**
 
-## **Exploratory Data Analysis**
+### **Exploratory Data Analysis**
 
 - **Feature distributions**: each feature was examined to understand its spread and detect potential issues. The findings:
     - Features showed reasonable variation
@@ -94,11 +94,11 @@ weight = global_importance × per_user_intensity
 
 `global_importance` comes from the model's feature importance (constant across all users), while `intensity` is a per feature function that maps a user's specific value to a range of [0, 1]. This means two users with the same final score can end up with different contributor explanations, depending on their own input values.
 
-## **Hyperparameter Tuning**
+### **Hyperparameter Tuning**
 
 Instead of manually guessing parameters **Optuna** automatically tries many combinations and learns from previous results to focus on the most promising ones, then identify optimal combinations for model performance. The optimal configurations for parameters: number of estimators = 496, learning rate = 0.0106, and tree-depth = 5.
 
-## Model Conversion
+### Model Conversion
 
 The trained model in Python was converted using **_coremltools_** into Core ML format to enable deployment on iOS (Xcode). CoreML is selected because it enables on-device inference, eliminates dependency on external servers, and improves speed and privacy.
 
