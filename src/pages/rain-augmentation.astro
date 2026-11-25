@@ -1,0 +1,711 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Tag from '../components/Tag.astro';
+
+type Slider = {
+  key: string;
+  label: string;
+  help: string;
+  min: number;
+  max: number;
+  step: number;
+};
+
+const groups: { title: string; open: boolean; sliders: Slider[] }[] = [
+  {
+    title: 'Rain',
+    open: true,
+    sliders: [
+      { key: 'amount', label: 'Amount of rain', help: 'How many drops fall. 1× matches the rain level above.', min: 0.2, max: 3, step: 0.05 },
+      { key: 'rainfall', label: 'Rainfall', help: 'Heavier showers have bigger drops that fall faster.', min: 1, max: 100, step: 1 },
+      { key: 'brightness', label: 'Streak brightness', help: 'How easy each rain streak is to see.', min: 0.3, max: 2.5, step: 0.05 },
+    ],
+  },
+  {
+    title: 'Wind',
+    open: false,
+    sliders: [
+      { key: 'wind', label: 'Direction', help: 'Tilts the rain. Below 0 leans left, above 0 leans right.', min: -25, max: 25, step: 1 },
+      { key: 'gusts', label: 'Gusts', help: 'How much the wind shifts during the video.', min: 0, max: 12, step: 0.5 },
+    ],
+  },
+  {
+    title: 'Sky and air',
+    open: false,
+    sliders: [
+      { key: 'mist', label: 'Mist', help: 'Haze that builds up in the distance.', min: 0, max: 0.5, step: 0.01 },
+      { key: 'visibility', label: 'Visibility', help: 'How far you can see before the mist takes over. Lower is foggier.', min: 5, max: 120, step: 1 },
+      { key: 'darker', label: 'Darker sky', help: 'Dims the scene like an overcast day.', min: 0, max: 0.5, step: 0.01 },
+      { key: 'faded', label: 'Faded colors', help: 'Washes out colors the way rain does.', min: 0, max: 0.6, step: 0.01 },
+      { key: 'softness', label: 'Softness', help: 'A slight blur from the wet air.', min: 0, max: 2, step: 0.05 },
+    ],
+  },
+  {
+    title: 'Camera',
+    open: false,
+    sliders: [
+      { key: 'fov', label: 'Field of view', help: 'How wide the camera sees. Security cameras are usually wide.', min: 40, max: 130, step: 1 },
+      { key: 'tilt', label: 'Tilt', help: 'How far the camera points down. 0° looks straight ahead.', min: 0, max: 80, step: 1 },
+      { key: 'height', label: 'Height', help: 'How high the camera sits above the ground.', min: 0.5, max: 12, step: 0.1 },
+      { key: 'shutter', label: 'Shutter speed', help: 'A slower shutter gives longer, fainter streaks.', min: 2, max: 60, step: 1 },
+      { key: 'nearBlur', label: 'Close-drop blur', help: 'Drops right in front of the lens look soft and out of focus.', min: 0, max: 15, step: 0.5 },
+    ],
+  },
+];
+const lensSlider: Slider = { key: 'lensRate', label: 'How often', help: 'New drops landing on the lens per second.', min: 0.05, max: 2, step: 0.05 };
+
+const segBtn =
+  'seg flex-1 whitespace-nowrap rounded-lg px-2 py-2 text-sm font-medium text-gray-600 transition hover:text-gray-900 aria-pressed:bg-white aria-pressed:text-primary-700 aria-pressed:shadow-sm dark:text-gray-400 dark:hover:text-gray-100 dark:aria-pressed:bg-gray-700 dark:aria-pressed:text-primary-300';
+const card = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-5';
+---
+
+<BaseLayout title="Rain Generator" description="Add realistic, moving rain to any video, right in your browser. Your video never leaves your device.">
+  <header class="mb-8">
+    <h1 class="text-gradient inline-block text-3xl font-extrabold sm:text-4xl">Rain Generator</h1>
+    <p class="mt-3 max-w-2xl text-lg text-gray-500 dark:text-gray-400">
+      Add realistic, moving rain to any video. Upload a clip, pick how heavy the rain should be, and download the
+      result. Everything runs in your browser, so your video never leaves your device.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-1.5">
+      <Tag label="Physics-based rendering" />
+      <Tag label="Data augmentation" />
+      <Tag label="Runs in your browser" />
+    </div>
+  </header>
+
+  <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <!-- Main: upload, preview, generate -->
+    <section class={card}>
+      <!-- Empty state -->
+      <label
+        id="drop"
+        for="file"
+        class="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 px-6 py-16 text-center transition hover:border-primary-300 hover:bg-primary-50/40 dark:border-gray-700 dark:hover:border-primary-500/50 dark:hover:bg-primary-500/5"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-12 w-12 text-primary-400" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20 15.5A4.5 4.5 0 0 0 17.5 7a6 6 0 0 0-11.6 1.6A4 4 0 0 0 6 16.5" />
+          <path stroke-linecap="round" d="M8 19l-1 2M12 18l-1 3M16 19l-1 2" />
+        </svg>
+        <span class="mt-4 text-base font-semibold text-gray-900 dark:text-gray-100">Drop a video here, or click to browse</span>
+        <span class="mt-1 text-sm text-gray-500 dark:text-gray-400">MP4, MOV, or WebM. Up to 2 minutes is used.</span>
+        <span class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5" aria-hidden="true"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd" /></svg>
+          Private: processed on your device, nothing is uploaded
+        </span>
+        <input id="file" type="file" accept="video/*" class="sr-only" />
+      </label>
+
+      <!-- Loaded state -->
+      <div id="stage" class="hidden">
+        <div id="viewer" class="relative touch-none select-none overflow-hidden rounded-xl bg-black">
+          <canvas id="preview" class="block h-auto w-full"></canvas>
+          <div id="split-line" class="pointer-events-none absolute inset-y-0 w-0.5 bg-white/90 shadow" style="left:50%">
+            <div class="absolute left-1/2 top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-gray-700 shadow-md">
+              <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" aria-hidden="true"><path d="M7 5 2 10l5 5V5Zm6 0v10l5-5-5-5Z" /></svg>
+            </div>
+          </div>
+          <span class="pointer-events-none absolute left-3 top-3 rounded-md bg-black/55 px-2 py-0.5 text-xs font-medium text-white">Original</span>
+          <span class="pointer-events-none absolute right-3 top-3 rounded-md bg-black/55 px-2 py-0.5 text-xs font-medium text-white">With rain</span>
+          <div id="loading" class="absolute inset-0 hidden items-center justify-center bg-black/40 text-sm font-medium text-white">Loading video…</div>
+        </div>
+
+        <div class="mt-3 flex flex-wrap items-center gap-3">
+          <button id="play" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700" aria-label="Pause preview">
+            <svg id="icon-pause" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path d="M6 4h3v12H6zM11 4h3v12h-3z" /></svg>
+            <svg id="icon-play" viewBox="0 0 20 20" fill="currentColor" class="hidden h-4 w-4"><path d="M6 4l10 6-10 6z" /></svg>
+          </button>
+          <div class="min-w-0 flex-1">
+            <p id="file-name" class="truncate text-sm font-medium text-gray-900 dark:text-gray-100"></p>
+            <p id="file-meta" class="text-xs text-gray-500 dark:text-gray-400"></p>
+          </div>
+          <label for="file" class="cursor-pointer text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">Change video</label>
+        </div>
+        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Drag the line on the preview to compare.</p>
+
+        <!-- Quick choices -->
+        <div class="mt-5 grid gap-4 sm:grid-cols-2">
+          <div>
+            <p class="mb-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">Rain level</p>
+            <div class="flex gap-1 rounded-xl bg-gray-100 p-1 dark:bg-gray-800" role="group" aria-label="Rain level">
+              <button type="button" class={segBtn} data-level="light" aria-pressed="false">Light</button>
+              <button type="button" class={segBtn} data-level="medium" aria-pressed="true">Medium</button>
+              <button type="button" class={segBtn} data-level="heavy" aria-pressed="false">Heavy</button>
+            </div>
+          </div>
+          <div>
+            <p class="mb-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">Camera view</p>
+            <div class="flex gap-1 rounded-xl bg-gray-100 p-1 dark:bg-gray-800" role="group" aria-label="Camera view">
+              <button type="button" class={segBtn} data-view="down" aria-pressed="true" title="Mounted high, looking down, like a security camera">Overhead</button>
+              <button type="button" class={segBtn} data-view="tilted" aria-pressed="false" title="Slightly above people, angled a little down">Tilted</button>
+              <button type="button" class={segBtn} data-view="eye" aria-pressed="false" title="Held at eye level, looking straight ahead">Eye level</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generate -->
+        <div id="generate-box" class="mt-6">
+          <button id="generate" type="button" class="btn-primary w-full justify-center py-3 text-base disabled:cursor-not-allowed disabled:opacity-50">
+            Generate rainy video
+          </button>
+          <p id="estimate" class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400"></p>
+        </div>
+
+        <!-- Progress -->
+        <div id="progress-box" class="mt-6 hidden">
+          <div class="flex items-baseline justify-between text-sm">
+            <span id="progress-text" class="font-medium text-gray-900 dark:text-gray-100">Adding rain…</span>
+            <span id="progress-eta" class="text-gray-500 dark:text-gray-400"></span>
+          </div>
+          <div class="mt-2 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+            <div id="progress-bar" class="h-full w-0 rounded-full bg-gradient-to-r from-primary-400 to-primary-600 transition-[width] duration-300"></div>
+          </div>
+          <div class="mt-3 text-center">
+            <button id="cancel" type="button" class="text-sm font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div id="result-box" class="mt-6 hidden">
+          <div class="rounded-xl border border-primary-100 bg-primary-50/60 p-4 dark:border-primary-500/20 dark:bg-primary-500/10">
+            <p class="text-sm font-semibold text-primary-800 dark:text-primary-200">Your rainy video is ready</p>
+            <p id="result-meta" class="text-xs text-primary-700/80 dark:text-primary-300/80"></p>
+            <video id="result-video" controls playsinline class="mt-3 w-full rounded-lg bg-black"></video>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <a id="download" class="btn-primary flex-1 justify-center py-2.5" download="rain.mp4">Download MP4</a>
+              <button id="again" type="button" class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-white dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">Adjust and try again</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="error" class="mt-4 hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"></div>
+      <video id="source" class="hidden" muted loop playsinline preload="auto"></video>
+    </section>
+
+    <!-- Settings -->
+    <aside class={card + ' lg:sticky lg:top-20'}>
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg">Customize</h2>
+        <button id="reset" type="button" class="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">Reset</button>
+      </div>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional. Changes show up in the preview right away.</p>
+
+      <div class="mt-3 divide-y divide-gray-100 dark:divide-gray-800">
+        {groups.map((g) => (
+          <details class="group py-2" open={g.open}>
+            <summary class="flex cursor-pointer list-none items-center justify-between py-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
+              {g.title}
+              <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-400 transition group-open:rotate-180" aria-hidden="true"><path fill-rule="evenodd" d="M5.2 7.2a.75.75 0 0 1 1.06 0L10 10.94l3.74-3.74a.75.75 0 1 1 1.06 1.06l-4.27 4.27a.75.75 0 0 1-1.06 0L5.2 8.26a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
+            </summary>
+            <div class="space-y-4 pb-2 pt-2">
+              {g.sliders.map((s) => (
+                <div>
+                  <div class="flex items-baseline justify-between gap-2">
+                    <label for={`s-${s.key}`} class="text-sm text-gray-800 dark:text-gray-200">{s.label}</label>
+                    <output id={`v-${s.key}`} class="text-xs tabular-nums text-gray-500 dark:text-gray-400"></output>
+                  </div>
+                  <input id={`s-${s.key}`} data-key={s.key} type="range" min={s.min} max={s.max} step={s.step} class="rain-slider mt-1 w-full" />
+                  <p class="text-xs leading-5 text-gray-500 dark:text-gray-400">{s.help}</p>
+                </div>
+              ))}
+            </div>
+          </details>
+        ))}
+
+        <details class="group py-2">
+          <summary class="flex cursor-pointer list-none items-center justify-between py-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Drops on the lens
+            <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-400 transition group-open:rotate-180" aria-hidden="true"><path fill-rule="evenodd" d="M5.2 7.2a.75.75 0 0 1 1.06 0L10 10.94l3.74-3.74a.75.75 0 1 1 1.06 1.06l-4.27 4.27a.75.75 0 0 1-1.06 0L5.2 8.26a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
+          </summary>
+          <div class="space-y-4 pb-2 pt-2">
+            <label class="flex items-start gap-3">
+              <input id="lens-on" type="checkbox" class="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 accent-primary-600" checked />
+              <span>
+                <span class="block text-sm text-gray-800 dark:text-gray-200">Show drops on the lens</span>
+                <span class="block text-xs leading-5 text-gray-500 dark:text-gray-400">Blurry water spots that land on the camera glass and fade after a few seconds.</span>
+              </span>
+            </label>
+            <div>
+              <div class="flex items-baseline justify-between gap-2">
+                <label for={`s-${lensSlider.key}`} class="text-sm text-gray-800 dark:text-gray-200">{lensSlider.label}</label>
+                <output id={`v-${lensSlider.key}`} class="text-xs tabular-nums text-gray-500 dark:text-gray-400"></output>
+              </div>
+              <input id={`s-${lensSlider.key}`} data-key={lensSlider.key} type="range" min={lensSlider.min} max={lensSlider.max} step={lensSlider.step} class="rain-slider mt-1 w-full" />
+              <p class="text-xs leading-5 text-gray-500 dark:text-gray-400">{lensSlider.help}</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="group py-2">
+          <summary class="flex cursor-pointer list-none items-center justify-between py-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Output
+            <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-400 transition group-open:rotate-180" aria-hidden="true"><path fill-rule="evenodd" d="M5.2 7.2a.75.75 0 0 1 1.06 0L10 10.94l3.74-3.74a.75.75 0 1 1 1.06 1.06l-4.27 4.27a.75.75 0 0 1-1.06 0L5.2 8.26a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
+          </summary>
+          <div class="space-y-4 pb-2 pt-2">
+            <div>
+              <label for="out-size" class="text-sm text-gray-800 dark:text-gray-200">Video size</label>
+              <select id="out-size" class="mt-1 w-full rounded-lg border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                <option value="640">Small (640 px), fastest</option>
+                <option value="960" selected>Standard (960 px)</option>
+                <option value="1280">HD (1280 px)</option>
+                <option value="1920">Full HD (1920 px), slowest</option>
+              </select>
+              <p class="text-xs leading-5 text-gray-500 dark:text-gray-400">The long side of the video. Never larger than your original.</p>
+            </div>
+            <div>
+              <label for="out-length" class="text-sm text-gray-800 dark:text-gray-200">Length</label>
+              <select id="out-length" class="mt-1 w-full rounded-lg border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                <option value="10">First 10 seconds</option>
+                <option value="30">First 30 seconds</option>
+                <option value="60" selected>First minute</option>
+                <option value="120">First 2 minutes</option>
+              </select>
+            </div>
+            <label class="flex items-start gap-3">
+              <input id="keep-audio" type="checkbox" class="mt-0.5 h-4 w-4 rounded border-gray-300 accent-primary-600" checked />
+              <span>
+                <span class="block text-sm text-gray-800 dark:text-gray-200">Keep the original sound</span>
+                <span class="block text-xs leading-5 text-gray-500 dark:text-gray-400">Copies the audio from your video, if it has any.</span>
+              </span>
+            </label>
+            <div>
+              <div class="flex items-baseline justify-between gap-2">
+                <label for="seed" class="text-sm text-gray-800 dark:text-gray-200">Variation</label>
+              </div>
+              <div class="mt-1 flex gap-2">
+                <input id="seed" type="number" min="1" step="1" value="1" class="w-full rounded-lg border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                <button id="shuffle" type="button" class="shrink-0 rounded-lg border border-gray-200 px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">Shuffle</button>
+              </div>
+              <p class="text-xs leading-5 text-gray-500 dark:text-gray-400">The same number always gives the same rain. Shuffle for a new random pattern.</p>
+            </div>
+          </div>
+        </details>
+      </div>
+    </aside>
+  </div>
+
+  <!-- How it works -->
+  <section class="mt-14">
+    <h2 class="text-2xl">How it works</h2>
+    <div class="mt-5 grid gap-4 sm:grid-cols-3">
+      <div class={card}>
+        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Drops in 3D</p>
+        <p class="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-400">
+          Each raindrop has a real position in front of the camera. Close drops look long and blurry, distant ones
+          look short and faint, just like in real footage.
+        </p>
+      </div>
+      <div class={card}>
+        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Real physics</p>
+        <p class="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-400">
+          Drop sizes and falling speeds follow measured rain data. Streak length depends on the camera's shutter,
+          and mist thickens with distance.
+        </p>
+      </div>
+      <div class={card}>
+        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Smooth over time</p>
+        <p class="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-400">
+          Wind, rain strength, and mist change gently during the clip, and drops stay consistent from frame to frame,
+          so nothing flickers.
+        </p>
+      </div>
+    </div>
+    <p class="mt-5 text-sm text-gray-500 dark:text-gray-400">
+      Works best in a recent version of Chrome, Edge, or Safari on a computer.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .rain-slider {
+    accent-color: #6470e2;
+    height: 1.25rem;
+  }
+  :global(.dark) .rain-slider {
+    accent-color: #96a1f6;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
+
+<script>
+  import { RainRenderer, presetSettings, viewSettings, type Level, type RainSettings, type View } from '../lib/rain/engine';
+  import { FriendlyError, browserCanExport, exportRainVideo, outputSize, probeVideo, type VideoInfo } from '../lib/rain/exporter';
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+
+  const PREVIEW_LONG = 640;
+  const LEVEL_KEYS = ['rainfall', 'mist', 'visibility', 'darker', 'faded', 'softness', 'lensRate'] as const;
+  const VIEW_KEYS = ['fov', 'tilt', 'height', 'shutter'] as const;
+
+  // ---------------------------------------------------------------- state
+  let settings: RainSettings = presetSettings('medium', 'down', 1);
+  let file: File | null = null;
+  let info: VideoInfo | null = null;
+  let renderer: RainRenderer | null = null;
+  let playing = true;
+  let split = 0.5;
+  let previewT = 0;
+  let lastNow = 0;
+  let renderMs = 40;
+  let busy = false;
+  let abort: AbortController | null = null;
+  let resultUrl: string | null = null;
+  let rebuildTimer = 0;
+
+  const video = $<HTMLVideoElement>('source');
+  const canvas = $<HTMLCanvasElement>('preview');
+  const ctx = canvas.getContext('2d')!;
+  const viewer = $<HTMLDivElement>('viewer');
+
+  // ---------------------------------------------------------------- formatting
+  const fmt: Record<string, (v: number) => string> = {
+    amount: (v) => `${v.toFixed(2)}×`,
+    rainfall: (v) => `${Math.round(v)} mm/h`,
+    brightness: (v) => `${v.toFixed(2)}×`,
+    wind: (v) => (v === 0 ? 'Straight down' : `${Math.abs(v)}° ${v < 0 ? 'left' : 'right'}`),
+    gusts: (v) => (v === 0 ? 'None' : `${v}°`),
+    mist: (v) => `${Math.round(v * 100)}%`,
+    visibility: (v) => `${Math.round(v)} m`,
+    darker: (v) => `${Math.round(v * 100)}%`,
+    faded: (v) => `${Math.round(v * 100)}%`,
+    softness: (v) => (v === 0 ? 'Off' : v.toFixed(2)),
+    fov: (v) => `${Math.round(v)}°`,
+    tilt: (v) => `${Math.round(v)}°`,
+    height: (v) => `${v.toFixed(1)} m`,
+    shutter: (v) => `1/${Math.round(1000 / v)} s`,
+    nearBlur: (v) => (v === 0 ? 'Off' : v.toFixed(1)),
+    lensRate: (v) => `${v.toFixed(2)} per second`,
+  };
+
+  function fmtDuration(s: number) {
+    s = Math.max(0, Math.round(s));
+    if (s < 60) return `${s} s`;
+    const m = Math.floor(s / 60);
+    return `${m} min ${String(s % 60).padStart(2, '0')} s`;
+  }
+
+  function roughTime(s: number) {
+    if (s < 15) return 'a few seconds';
+    if (s < 50) return `about ${Math.round(s / 5) * 5} seconds`;
+    if (s < 90) return 'about a minute';
+    return `about ${Math.round(s / 60)} minutes`;
+  }
+
+  // ---------------------------------------------------------------- settings UI
+  const sliders = Array.from(document.querySelectorAll<HTMLInputElement>('input.rain-slider'));
+
+  function syncControls() {
+    for (const el of sliders) {
+      const key = el.dataset.key as keyof RainSettings;
+      el.value = String(settings[key]);
+      $<HTMLOutputElement>(`v-${key}`).textContent = fmt[key](Number(settings[key]));
+    }
+    $<HTMLInputElement>('lens-on').checked = settings.lensDrops;
+    $<HTMLInputElement>(`s-lensRate`).disabled = !settings.lensDrops;
+    $<HTMLInputElement>('seed').value = String(settings.seed);
+    document.querySelectorAll<HTMLButtonElement>('[data-level]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.level === settings.level)));
+    document.querySelectorAll<HTMLButtonElement>('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === settings.view)));
+  }
+
+  function changed() {
+    syncControls();
+    updateEstimate();
+    window.clearTimeout(rebuildTimer);
+    rebuildTimer = window.setTimeout(rebuild, 90);
+  }
+
+  for (const el of sliders) {
+    el.addEventListener('input', () => {
+      (settings as any)[el.dataset.key!] = Number(el.value);
+      $<HTMLOutputElement>(`v-${el.dataset.key}`).textContent = fmt[el.dataset.key!](Number(el.value));
+      window.clearTimeout(rebuildTimer);
+      rebuildTimer = window.setTimeout(rebuild, 90);
+    });
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-level]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const level = b.dataset.level as Level;
+      const p = presetSettings(level, settings.view, settings.seed);
+      settings.level = level;
+      for (const k of LEVEL_KEYS) (settings as any)[k] = p[k];
+      changed();
+    }),
+  );
+
+  document.querySelectorAll<HTMLButtonElement>('[data-view]').forEach((b) =>
+    b.addEventListener('click', () => {
+      settings.view = b.dataset.view as View;
+      Object.assign(settings, viewSettings(settings.view));
+      changed();
+    }),
+  );
+
+  $('lens-on').addEventListener('change', (e) => {
+    settings.lensDrops = (e.target as HTMLInputElement).checked;
+    changed();
+  });
+
+  $('seed').addEventListener('change', (e) => {
+    settings.seed = Math.max(1, Math.round(Number((e.target as HTMLInputElement).value) || 1));
+    changed();
+  });
+
+  $('shuffle').addEventListener('click', () => {
+    settings.seed = 1 + Math.floor(Math.random() * 9999);
+    changed();
+  });
+
+  $('reset').addEventListener('click', () => {
+    settings = presetSettings(settings.level, settings.view, settings.seed);
+    changed();
+  });
+
+  for (const id of ['out-size', 'out-length']) $(id).addEventListener('change', updateEstimate);
+
+  // ---------------------------------------------------------------- errors
+  function showError(msg: string | null) {
+    const box = $('error');
+    box.textContent = msg ?? '';
+    box.classList.toggle('hidden', !msg);
+  }
+
+  // ---------------------------------------------------------------- loading a video
+  async function loadFile(f: File) {
+    if (busy) return;
+    if (!f.type.startsWith('video/') && !/\.(mp4|mov|m4v|webm|mkv)$/i.test(f.name)) {
+      showError('Please choose a video file, such as an MP4 or MOV.');
+      return;
+    }
+    showError(null);
+    file = f;
+    info = null;
+    resetResult();
+    $('drop').classList.add('hidden');
+    $('stage').classList.remove('hidden');
+    $('loading').classList.replace('hidden', 'flex');
+    $('file-name').textContent = f.name;
+    $('file-meta').textContent = '';
+    if (video.src) URL.revokeObjectURL(video.src);
+    video.src = URL.createObjectURL(f);
+    try {
+      info = await probeVideo(f);
+      $('file-meta').textContent =
+        `${fmtDuration(info.duration)} · ${info.width} × ${info.height} · ${Math.round(info.fps)} fps` +
+        (info.hasAudio ? ' · with sound' : '');
+    } catch (err) {
+      $('file-meta').textContent = '';
+      if (err instanceof FriendlyError) showError(err.message);
+    }
+    updateEstimate();
+  }
+
+  video.addEventListener('loadeddata', () => {
+    $('loading').classList.replace('flex', 'hidden');
+    const w = video.videoWidth, h = video.videoHeight;
+    const s = Math.min(1, PREVIEW_LONG / Math.max(w, h));
+    canvas.width = Math.max(2, Math.round(w * s));
+    canvas.height = Math.max(2, Math.round(h * s));
+    rebuild();
+    if (playing) video.play().catch(() => setPlaying(false));
+  });
+
+  video.addEventListener('error', () => {
+    $('loading').classList.replace('flex', 'hidden');
+    showError("Your browser can't play this video. Try an MP4 (H.264) file.");
+  });
+
+  const fileInput = $<HTMLInputElement>('file');
+  fileInput.addEventListener('change', () => {
+    const f = fileInput.files?.[0];
+    if (f) loadFile(f);
+    fileInput.value = '';
+  });
+
+  for (const target of [$('drop'), viewer]) {
+    target.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      target.classList.add('ring-2', 'ring-primary-300');
+    });
+    target.addEventListener('dragleave', () => target.classList.remove('ring-2', 'ring-primary-300'));
+    target.addEventListener('drop', (e) => {
+      e.preventDefault();
+      target.classList.remove('ring-2', 'ring-primary-300');
+      const f = e.dataTransfer?.files?.[0];
+      if (f) loadFile(f);
+    });
+  }
+
+  // ---------------------------------------------------------------- live preview
+  function rebuild() {
+    if (!canvas.width || video.readyState < 2) return;
+    renderer = new RainRenderer({ ...settings }, canvas.width, canvas.height, 'video');
+    previewT = 0;
+    // let the rain run for a moment so it looks like the middle of a shower
+    for (let i = 0; i < 4; i++) renderer.render(video, (previewT += 0.08));
+    draw();
+  }
+
+  function draw() {
+    if (!renderer) return;
+    const { width: w, height: h } = canvas;
+    ctx.drawImage(renderer.canvas, 0, 0);
+    const x = Math.round(split * w);
+    if (x > 0) ctx.drawImage(video, 0, 0, video.videoWidth * split, video.videoHeight, 0, 0, x, h);
+    $('split-line').style.left = `${split * 100}%`;
+  }
+
+  function loop(now: number) {
+    const dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 0;
+    lastNow = now;
+    if (renderer && playing && !busy && video.readyState >= 2 && !document.hidden) {
+      const t0 = performance.now();
+      previewT += dt;
+      renderer.render(video, previewT);
+      renderMs = renderMs * 0.9 + (performance.now() - t0) * 0.1;
+      draw();
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  function setPlaying(p: boolean) {
+    playing = p;
+    $('icon-pause').classList.toggle('hidden', !p);
+    $('icon-play').classList.toggle('hidden', p);
+    $('play').setAttribute('aria-label', p ? 'Pause preview' : 'Play preview');
+    if (p) video.play().catch(() => {});
+    else video.pause();
+  }
+  $('play').addEventListener('click', () => setPlaying(!playing));
+
+  // compare slider
+  let dragging = false;
+  const setSplit = (e: PointerEvent) => {
+    const r = viewer.getBoundingClientRect();
+    split = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    draw();
+  };
+  viewer.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    viewer.setPointerCapture(e.pointerId);
+    setSplit(e);
+  });
+  viewer.addEventListener('pointermove', (e) => dragging && setSplit(e));
+  viewer.addEventListener('pointerup', () => (dragging = false));
+  viewer.addEventListener('pointercancel', () => (dragging = false));
+
+  // ---------------------------------------------------------------- export
+  function outputOptions() {
+    return {
+      longSide: Number($<HTMLSelectElement>('out-size').value),
+      maxSeconds: Number($<HTMLSelectElement>('out-length').value),
+      keepAudio: $<HTMLInputElement>('keep-audio').checked,
+    };
+  }
+
+  function updateEstimate() {
+    const el = $('estimate');
+    const btn = $<HTMLButtonElement>('generate');
+    if (!browserCanExport()) {
+      btn.disabled = true;
+      el.textContent = "Your browser can't create videos. Please use a recent version of Chrome, Edge, or Safari.";
+      return;
+    }
+    btn.disabled = !file;
+    if (!info) {
+      el.textContent = '';
+      return;
+    }
+    const o = outputOptions();
+    const [w, h] = outputSize(info.width, info.height, o.longSide);
+    const secs = Math.min(info.duration, o.maxSeconds);
+    const frames = secs * info.fps;
+    const area = (w * h) / Math.max(1, canvas.width * canvas.height);
+    const perFrame = (renderMs * (0.45 + 0.55 * area) + 6) / 1000;
+    const trimmed = info.duration > o.maxSeconds + 0.5 ? ` Only the first ${fmtDuration(o.maxSeconds)} is used.` : '';
+    el.textContent = `${w} × ${h}, ${fmtDuration(secs)}. Takes ${roughTime(frames * perFrame)} on this device.${trimmed}`;
+  }
+
+  function resetResult() {
+    if (resultUrl) URL.revokeObjectURL(resultUrl);
+    resultUrl = null;
+    $('result-box').classList.add('hidden');
+    $('generate-box').classList.remove('hidden');
+    $<HTMLVideoElement>('result-video').removeAttribute('src');
+  }
+
+  function setBusy(b: boolean) {
+    busy = b;
+    $('generate-box').classList.toggle('hidden', b);
+    $('progress-box').classList.toggle('hidden', !b);
+    document.querySelectorAll<HTMLElement>('aside input, aside select, aside button, [data-level], [data-view]').forEach((el) => {
+      (el as HTMLInputElement).disabled = b;
+    });
+    fileInput.disabled = b;
+    if (!b) syncControls();
+  }
+
+  $('generate').addEventListener('click', async () => {
+    if (!file || busy) return;
+    showError(null);
+    resetResult();
+    setBusy(true);
+    const wasPlaying = playing;
+    video.pause();
+    abort = new AbortController();
+    const started = performance.now();
+    $<HTMLDivElement>('progress-bar').style.width = '0%';
+    $('progress-text').textContent = 'Getting ready…';
+    $('progress-eta').textContent = '';
+    try {
+      const res = await exportRainVideo(file, { ...settings }, outputOptions(), (done, total) => {
+        const frac = Math.min(1, done / total);
+        $<HTMLDivElement>('progress-bar').style.width = `${(frac * 100).toFixed(1)}%`;
+        $('progress-text').textContent = `Adding rain… ${Math.round(frac * 100)}%`;
+        const el = (performance.now() - started) / 1000;
+        if (done > 10 && frac < 1) $('progress-eta').textContent = `${roughTime((el / frac) * (1 - frac))} left`;
+      }, abort.signal);
+      resultUrl = URL.createObjectURL(res.blob);
+      const rv = $<HTMLVideoElement>('result-video');
+      rv.src = resultUrl;
+      const a = $<HTMLAnchorElement>('download');
+      a.href = resultUrl;
+      a.download = `${file.name.replace(/\.[^.]+$/, '')}-rain.mp4`;
+      $('result-meta').textContent =
+        `${res.width} × ${res.height} · ${res.frames} frames · ${(res.blob.size / 1e6).toFixed(1)} MB` +
+        (res.hasAudio ? ' · with sound' : '') + ` · made in ${fmtDuration(res.seconds)}`;
+      $('result-box').classList.remove('hidden');
+      $('generate-box').classList.add('hidden');
+      setBusy(false);
+      $('generate-box').classList.add('hidden');
+      $('result-box').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (err: any) {
+      setBusy(false);
+      if (err?.name === 'AbortError') {
+        showError(null);
+      } else {
+        console.error(err);
+        showError(err instanceof FriendlyError ? err.message : 'Something went wrong while creating the video. Try a smaller video size or another file.');
+      }
+    } finally {
+      abort = null;
+      if (wasPlaying) setPlaying(true);
+    }
+  });
+
+  $('cancel').addEventListener('click', () => abort?.abort());
+  $('again').addEventListener('click', () => {
+    resetResult();
+    updateEstimate();
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (busy) e.preventDefault();
+  });
+
+  syncControls();
+  updateEstimate();
+</script>
