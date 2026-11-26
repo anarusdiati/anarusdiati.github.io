@@ -6,6 +6,7 @@ tags:
   - Machine Learning
   - Research
 date: 2026-11-25
+featured: true
 link: https://anarusdiati.github.io/rain-augmentation/
 ---
 
