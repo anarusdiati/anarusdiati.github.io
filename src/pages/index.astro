@@ -17,7 +17,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const featured = (await getCollection('projects'))
   .filter((p) => p.data.featured)
   .sort((a, b) => (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0))
-  .slice(0, 3);
+  .slice(0, 4);
 ---
 
 <BaseLayout>
