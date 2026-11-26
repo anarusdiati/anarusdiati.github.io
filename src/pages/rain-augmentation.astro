@@ -58,6 +58,16 @@ const lensSlider: Slider = { key: 'lensRate', label: 'How often', help: 'New dro
 
 const segBtn =
   'seg flex-1 whitespace-nowrap rounded-lg px-2 py-2 text-sm font-medium text-gray-600 transition hover:text-gray-900 aria-pressed:bg-white aria-pressed:text-primary-700 aria-pressed:shadow-sm dark:text-gray-400 dark:hover:text-gray-100 dark:aria-pressed:bg-gray-700 dark:aria-pressed:text-primary-300';
+const worked = [
+  'Yes, I got my rainy video',
+  'Sort of, but something felt off',
+  "No, it didn't work for me",
+  'I only played with the preview',
+];
+const pill =
+  'rounded-lg border border-gray-200 px-3 py-2.5 text-left text-sm text-gray-700 transition hover:border-primary-300 aria-pressed:border-primary-500 aria-pressed:bg-primary-50 aria-pressed:text-primary-700 dark:border-gray-700 dark:text-gray-300 dark:hover:border-primary-500/60 dark:aria-pressed:border-primary-400 dark:aria-pressed:bg-primary-500/15 dark:aria-pressed:text-primary-200';
+const field =
+  'mt-1.5 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:ring-primary-500/30';
 const card = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-5';
 ---
 
@@ -179,11 +189,13 @@ const card = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:bor
               <a id="download" class="btn-primary flex-1 justify-center py-2.5" download="rain.mp4">Download MP4</a>
               <button id="again" type="button" class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-white dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">Adjust and try again</button>
             </div>
+            <a href="#feedback" id="fb-after" class="mt-3 inline-block text-sm font-medium text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200">Got a minute? Tell me how it went →</a>
           </div>
         </div>
       </div>
 
       <div id="error" class="mt-4 hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"></div>
+      <a href="#feedback" id="fb-error" class="mt-2 hidden text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">Tell me what happened, it really helps me fix it →</a>
       <video id="source" class="hidden" muted loop playsinline preload="auto"></video>
     </section>
 
@@ -321,6 +333,79 @@ const card = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:bor
       Works best in a recent version of Chrome, Edge, or Safari on a computer.
     </p>
   </section>
+
+  <!-- Feedback -->
+  <section id="feedback" class="mt-14 scroll-mt-24">
+    <div class={card + ' sm:p-7'}>
+      <h2 class="text-2xl">How did it go?</h2>
+      <p class="mt-2 max-w-2xl text-gray-600 dark:text-gray-400">
+        This is a personal project and I read every reply. Tell me what worked, what didn't, and what looked off.
+        Honest beats polite here.
+      </p>
+
+      <form id="fb-form" class="mt-6 space-y-6" novalidate>
+        <fieldset>
+          <legend class="text-sm font-semibold text-gray-900 dark:text-gray-100">Did it work for you? <span class="text-primary-600 dark:text-primary-400">*</span></legend>
+          <div class="mt-2 grid gap-2 sm:grid-cols-2">
+            {worked.map((w) => (
+              <button type="button" class={pill} data-fb-worked={w} aria-pressed="false">{w}</button>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend class="text-sm font-semibold text-gray-900 dark:text-gray-100">How real did the rain look? <span class="text-primary-600 dark:text-primary-400">*</span></legend>
+          <div class="mt-2 flex flex-wrap items-center gap-3">
+            <span class="text-xs text-gray-500 dark:text-gray-400">Clearly fake</span>
+            <div class="flex gap-1.5">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button type="button" class={pill + ' h-10 w-10 justify-center px-0 py-0 text-center font-semibold'} data-fb-real={n} aria-pressed="false" aria-label={`${n} out of 5`}>{n}</button>
+              ))}
+            </div>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Could fool me</span>
+          </div>
+        </fieldset>
+
+        <div>
+          <label for="fb-fix" class="text-sm font-semibold text-gray-900 dark:text-gray-100">What should I fix, change, or add? <span class="text-primary-600 dark:text-primary-400">*</span></label>
+          <p class="text-xs leading-5 text-gray-500 dark:text-gray-400">Anything goes. What bugged you, what confused you, what you wish it could do. If something broke, tell me what you clicked right before it happened.</p>
+          <textarea id="fb-fix" rows="4" maxlength="4000" class={field} placeholder="For example: the rain looked too bright on my night video, and I couldn't find how to make it slower."></textarea>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="fb-use" class="text-sm font-semibold text-gray-900 dark:text-gray-100">What did you use it for? <span class="text-primary-600 dark:text-primary-400">*</span></label>
+            <p class="text-xs leading-5 text-gray-500 dark:text-gray-400">Just curious! Training data, a video project, testing a model, or just for fun.</p>
+            <input id="fb-use" type="text" maxlength="300" class={field} placeholder="Just for fun" />
+          </div>
+          <div>
+            <label for="fb-email" class="text-sm font-semibold text-gray-900 dark:text-gray-100">Your email <span class="font-normal text-gray-400">(optional)</span></label>
+            <p class="text-xs leading-5 text-gray-500 dark:text-gray-400">Only if you'd like a reply. I won't use it for anything else.</p>
+            <input id="fb-email" type="email" maxlength="200" autocomplete="email" class={field} placeholder="you@example.com" />
+          </div>
+        </div>
+
+        <details class="group text-xs text-gray-500 dark:text-gray-400">
+          <summary class="cursor-pointer list-none font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100">
+            <span class="group-open:hidden">+</span><span class="hidden group-open:inline">−</span> A few technical details are sent too, so I can fix bugs. See what's included
+          </summary>
+          <p class="mt-2">Your browser, screen size, the size and length of your video, and the rain settings you used. Never your video, its name, or anything in it.</p>
+          <pre id="fb-tech" class="mt-2 max-h-48 overflow-auto whitespace-pre-wrap rounded-lg bg-gray-50 p-3 font-mono text-[11px] leading-5 text-gray-600 dark:bg-gray-800 dark:text-gray-300"></pre>
+        </details>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button id="fb-send" type="submit" class="btn-primary px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-60">Send feedback</button>
+          <p id="fb-status" class="text-sm text-gray-500 dark:text-gray-400" aria-live="polite"></p>
+        </div>
+      </form>
+
+      <div id="fb-thanks" class="mt-6 hidden rounded-xl border border-primary-100 bg-primary-50/60 p-5 dark:border-primary-500/20 dark:bg-primary-500/10">
+        <p class="font-semibold text-primary-800 dark:text-primary-200">Thank you, I got it!</p>
+        <p class="mt-1 text-sm text-primary-700/90 dark:text-primary-300/90">I really appreciate you taking the time. Every note helps make the next version better.</p>
+        <button id="fb-again" type="button" class="mt-3 text-sm font-medium text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200">Send another note</button>
+      </div>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
@@ -337,7 +422,7 @@ const card = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:bor
 </style>
 
 <script>
-  import { RainRenderer, presetSettings, viewSettings, type Level, type RainSettings, type View } from '../lib/rain/engine';
+  import { RainRenderer, canvasFilterWorks, presetSettings, viewSettings, type Level, type RainSettings, type View } from '../lib/rain/engine';
   import { FriendlyError, browserCanExport, exportRainVideo, outputSize, probeVideo, type VideoInfo } from '../lib/rain/exporter';
 
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -689,6 +774,8 @@ const card = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:bor
       setBusy(false);
       $('generate-box').classList.add('hidden');
       $('result-box').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      lastRun = `ok, ${res.width}x${res.height}, ${res.frames} frames, ${res.seconds.toFixed(1)} s, ${(res.blob.size / 1e6).toFixed(1)} MB, audio ${res.hasAudio}`;
+      $('fb-error').classList.add('hidden');
     } catch (err: any) {
       setBusy(false);
       if (err?.name === 'AbortError') {
@@ -696,6 +783,8 @@ const card = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:bor
       } else {
         console.error(err);
         showError(err instanceof FriendlyError ? err.message : 'Something went wrong while creating the video. Try a smaller video size or another file.');
+        lastRun = `failed: ${String(err?.message ?? err).slice(0, 300)}`;
+        $('fb-error').classList.remove('hidden');
       }
     } finally {
       abort = null;
@@ -711,6 +800,121 @@ const card = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:bor
 
   window.addEventListener('beforeunload', (e) => {
     if (busy) e.preventDefault();
+  });
+
+  // ---------------------------------------------------------------- feedback (sent to a Google Form)
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSclziqOT8-XUwyuEoDRH0qTA5EBIrbrHvB-aclRSArxfp4Jdw/formResponse';
+  const FB = {
+    worked: 'entry.514226361',
+    realism: 'entry.45168191',
+    fix: 'entry.475789586',
+    usedFor: 'entry.42474791',
+    email: 'entry.1037229914',
+    tech: 'entry.2114227236',
+  };
+  let lastRun = '';
+  let fbWorked = '';
+  let fbReal = '';
+
+  function techDetails() {
+    const o = outputOptions();
+    const lines = [
+      `Page: ${location.pathname}`,
+      `Browser: ${navigator.userAgent}`,
+      `Screen: ${screen.width}x${screen.height} @${window.devicePixelRatio}x`,
+      `Can create videos: ${browserCanExport()}, canvas blur: ${canvasFilterWorks()}`,
+      info
+        ? `Video: ${info.width}x${info.height}, ${info.duration.toFixed(1)} s, ${Math.round(info.fps)} fps, sound ${info.hasAudio}`
+        : `Video: ${file ? 'loaded, details unknown' : 'none loaded'}`,
+      `Output: ${o.longSide} px, up to ${o.maxSeconds} s, keep sound ${o.keepAudio}`,
+      `Preview speed: ${Math.round(renderMs)} ms per frame`,
+      `Last run: ${lastRun || 'none'}`,
+      `Settings: ${JSON.stringify(settings)}`,
+    ];
+    return lines.join('\n').slice(0, 3000);
+  }
+
+  function pick(attr: string, value: string) {
+    document.querySelectorAll<HTMLButtonElement>(`[${attr}]`).forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute(attr) === value)));
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-fb-worked]').forEach((b) =>
+    b.addEventListener('click', () => {
+      fbWorked = b.dataset.fbWorked!;
+      pick('data-fb-worked', fbWorked);
+    }),
+  );
+  document.querySelectorAll<HTMLButtonElement>('[data-fb-real]').forEach((b) =>
+    b.addEventListener('click', () => {
+      fbReal = b.dataset.fbReal!;
+      pick('data-fb-real', fbReal);
+    }),
+  );
+
+  $('fb-after').addEventListener('click', () => {
+    fbWorked = 'Yes, I got my rainy video';
+    pick('data-fb-worked', fbWorked);
+  });
+  $('fb-error').addEventListener('click', () => {
+    fbWorked = "No, it didn't work for me";
+    pick('data-fb-worked', fbWorked);
+  });
+
+  const techBox = $('fb-tech');
+  techBox.closest('details')!.addEventListener('toggle', () => (techBox.textContent = techDetails()));
+
+  const fbStatus = $('fb-status');
+  $('fb-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fix = $<HTMLTextAreaElement>('fb-fix').value.trim();
+    const usedFor = $<HTMLInputElement>('fb-use').value.trim();
+    const email = $<HTMLInputElement>('fb-email').value.trim();
+    const missing = [!fbWorked && 'whether it worked', !fbReal && 'how real it looked', !fix && 'what to fix', !usedFor && 'what you used it for'].filter(Boolean);
+    if (missing.length) {
+      fbStatus.textContent = `Almost there! Please add ${missing.join(', ')}.`;
+      fbStatus.className = 'text-sm text-red-600 dark:text-red-400';
+      return;
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      fbStatus.textContent = "That email doesn't look quite right. You can also leave it empty.";
+      fbStatus.className = 'text-sm text-red-600 dark:text-red-400';
+      return;
+    }
+    const body = new URLSearchParams();
+    body.append(FB.worked, fbWorked);
+    body.append(FB.realism, fbReal);
+    body.append(FB.fix, fix);
+    body.append(FB.usedFor, usedFor);
+    if (email) body.append(FB.email, email);
+    body.append(FB.tech, techDetails());
+    body.append('fvv', '1');
+    body.append('pageHistory', '0');
+    const btn = $<HTMLButtonElement>('fb-send');
+    btn.disabled = true;
+    fbStatus.textContent = 'Sending…';
+    fbStatus.className = 'text-sm text-gray-500 dark:text-gray-400';
+    try {
+      // Google Forms does not allow reading the reply from another site, so a sent request counts as success.
+      await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body });
+      $('fb-form').classList.add('hidden');
+      $('fb-thanks').classList.remove('hidden');
+      fbStatus.textContent = '';
+    } catch {
+      fbStatus.textContent = "Couldn't send it. Check your connection and try again.";
+      fbStatus.className = 'text-sm text-red-600 dark:text-red-400';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('fb-again').addEventListener('click', () => {
+    ($('fb-form') as HTMLFormElement).reset();
+    fbWorked = '';
+    fbReal = '';
+    pick('data-fb-worked', '');
+    pick('data-fb-real', '');
+    $('fb-thanks').classList.add('hidden');
+    $('fb-form').classList.remove('hidden');
   });
 
   syncControls();
