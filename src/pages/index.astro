@@ -13,9 +13,11 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 //   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
 //   .slice(0, 2);
 
+// Featured projects, newest first (by the `date` in each post).
 const featured = (await getCollection('projects'))
   .filter((p) => p.data.featured)
-  .slice(0, 3);
+  .sort((a, b) => (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0))
+  .slice(0, 4);
 ---
 
 <BaseLayout>
