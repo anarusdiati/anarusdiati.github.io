@@ -249,6 +249,9 @@ that moves, rather than rain that flashes.
 - Other weather: snow and fog would reuse most of the same machinery.
 - A proper study of how much training with this kind of rain helps detection models on real rainy footage.
 
+Tried the generator? I'd love to hear how it went, good or bad.
+[Leave a quick note here](/rain-augmentation/#feedback). I read every one.
+
 ## References
 
 1. Garg, K., & Nayar, S. K. (2007). Vision and rain. *International Journal of Computer Vision, 75*(1), 3-27.
