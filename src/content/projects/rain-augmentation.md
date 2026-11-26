@@ -66,6 +66,13 @@ where $v$ is the fall speed, $T$ is the exposure time, $f$ is the focal length i
 the camera. A slow shutter gives long streaks. A fast shutter almost freezes the drops into dots. Drops that are close
 (small $Z$) leave long streaks, and distant drops leave short ones.
 
+
+<figure class="my-8">
+  <img src="/projects/rain-augmentation/streak-light.png" alt="Three panels: a fast shutter records a short dash, a slow shutter a long streak, and a far drop a short faint line." loading="lazy" class="w-full rounded-xl border border-gray-100 dark:hidden" />
+  <img src="/projects/rain-augmentation/streak-dark.png" alt="Three panels: a fast shutter records a short dash, a slow shutter a long streak, and a far drop a short faint line." loading="lazy" class="hidden w-full rounded-xl border border-gray-800 dark:block" />
+  <figcaption class="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">A slow shutter turns a falling drop into a long streak. The same drop farther away leaves a shorter, fainter line.</figcaption>
+</figure>
+
 ### Drops come in different sizes
 
 Rain is not made of identical drops. Meteorologists measured this decades ago, and the classic result is the
@@ -82,6 +89,13 @@ fall faster. A good fit to measurements is [4]:
 $$
 v(D) = 9.65 - 10.3\,e^{-0.6D} \quad \text{m/s}
 $$
+
+
+<figure class="my-8">
+  <img src="/projects/rain-augmentation/drops-light.png" alt="Left: drop size distributions for light, medium, and heavy rain. Right: fall speed rising with drop diameter." loading="lazy" class="w-full rounded-xl border border-gray-100 dark:hidden" />
+  <img src="/projects/rain-augmentation/drops-dark.png" alt="Left: drop size distributions for light, medium, and heavy rain. Right: fall speed rising with drop diameter." loading="lazy" class="hidden w-full rounded-xl border border-gray-800 dark:block" />
+  <figcaption class="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">Heavier rain shifts the mix toward bigger drops (left), and bigger drops fall faster (right).</figcaption>
+</figure>
 
 In the generator, every drop gets its own size from this distribution, and its speed follows from its size. That is
 why the "Rainfall" slider changes more than the number of drops. It changes what the drops look like.
@@ -105,6 +119,13 @@ each pixel just as long relative to its size, so it shows up as a fine, faint li
   lines converge toward a point below the frame. Rain from a high camera fans out; rain seen at eye level looks almost
   vertical.
 
+
+<figure class="my-8">
+  <img src="/projects/rain-augmentation/sideview-light.png" alt="Side view of a camera on a pole: close drops drawn long and blurry, far drops short and faint, with mist growing with distance." loading="lazy" class="w-full rounded-xl border border-gray-100 dark:hidden" />
+  <img src="/projects/rain-augmentation/sideview-dark.png" alt="Side view of a camera on a pole: close drops drawn long and blurry, far drops short and faint, with mist growing with distance." loading="lazy" class="hidden w-full rounded-xl border border-gray-800 dark:block" />
+  <figcaption class="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">What changes with distance: close drops are long and out of focus, far drops are short, thin, and fade into the mist.</figcaption>
+</figure>
+
 ### Water on the lens
 
 Outdoor cameras get wet. A few drops land on the glass, sit there blurring a small patch of the image, and fade after
@@ -118,6 +139,13 @@ follow a slow random drift (an Ornstein-Uhlenbeck process [11], which is just a 
 back toward its average). Gusts sit on top of that as faster, smaller wiggles. The result is rain that gets a little
 heavier and lighter and leans a bit with the wind, without ever jumping between frames.
 
+
+<figure class="my-8">
+  <img src="/projects/rain-augmentation/flicker-light.png" alt="Two time plots: per-frame random rain strength and wind jump every frame, while the slow drift changes smoothly." loading="lazy" class="w-full rounded-xl border border-gray-100 dark:hidden" />
+  <img src="/projects/rain-augmentation/flicker-dark.png" alt="Two time plots: per-frame random rain strength and wind jump every frame, while the slow drift changes smoothly." loading="lazy" class="hidden w-full rounded-xl border border-gray-800 dark:block" />
+  <figcaption class="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">Rain strength and wind over 12 seconds. Grey: new random values every frame. Purple: the slow drift used here.</figcaption>
+</figure>
+
 ## From screen layers to drops in 3D
 
 The first version of the generator drew rain on the image plane: a layer of thin, sharp "far" streaks and a layer of
@@ -125,12 +153,26 @@ thicker, blurred "near" streaks, both moving as particles from frame to frame. T
 is still in the repository as the lighter option. But it kept the "rain on a sheet of glass" feel, because every drop
 in a layer was effectively at the same distance.
 
+
+<figure class="my-8">
+  <img src="/projects/rain-augmentation/compare-light.png" alt="The same street scene clear, with screen-layer rain, and with drops in 3D." loading="lazy" class="w-full rounded-xl border border-gray-100 dark:hidden" />
+  <img src="/projects/rain-augmentation/compare-dark.png" alt="The same street scene clear, with screen-layer rain, and with drops in 3D." loading="lazy" class="hidden w-full rounded-xl border border-gray-800 dark:block" />
+  <figcaption class="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">Same scene, same rain level. The screen layer looks painted on; drops in 3D have depth and haze.</figcaption>
+</figure>
+
 The current version places every drop in 3D space in front of a simple pinhole camera, in the spirit of
 physics-based rain rendering for computer vision [6], [7]. Each drop has a position in
 metres, falls at its own physical speed, and stops when it reaches the ground. For every frame, the generator works out
 where each drop was when the shutter opened and where it is when the shutter closes, projects both points onto the
 image, and draws the line between them. Length, width, blur, speed on screen, and how much mist covers it all fall out
 of that one step, instead of being separate tricks.
+
+
+<figure class="my-8">
+  <img src="/projects/rain-augmentation/pipeline-light.png" alt="Flowchart: once per video set up the camera and drops, then for every frame weather drifts, drops fall, streaks are drawn, blurred by distance, overcast and mist are added, lens drops appear, and the frame is saved." loading="lazy" class="w-full rounded-xl border border-gray-100 dark:hidden" />
+  <img src="/projects/rain-augmentation/pipeline-dark.png" alt="Flowchart: once per video set up the camera and drops, then for every frame weather drifts, drops fall, streaks are drawn, blurred by distance, overcast and mist are added, lens drops appear, and the frame is saved." loading="lazy" class="hidden w-full rounded-xl border border-gray-800 dark:block" />
+  <figcaption class="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">What happens to every frame of your video.</figcaption>
+</figure>
 
 ### Not simulating a billion drops
 
@@ -143,6 +185,13 @@ keeps the number of drops per metre of depth roughly constant and stops the dist
 noise. When a drop moves from one shell to the next, it fades out gradually instead of popping. Even with heavy rain,
 this keeps it to a few hundred thousand simulated drops, of which only a few tens of thousands are drawn in any one
 frame.
+
+
+<figure class="my-8">
+  <img src="/projects/rain-augmentation/shells-light.png" alt="Top view of the camera's field of view split into distance shells, with many drops close and fewer far away." loading="lazy" class="w-full rounded-xl border border-gray-100 dark:hidden" />
+  <img src="/projects/rain-augmentation/shells-dark.png" alt="Top view of the camera's field of view split into distance shells, with many drops close and fewer far away." loading="lazy" class="hidden w-full rounded-xl border border-gray-800 dark:block" />
+  <figcaption class="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">The air in front of the camera, seen from above. Close shells are full of drops; far ones are sparse.</figcaption>
+</figure>
 
 ### Knowing where things are
 
